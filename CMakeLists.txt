@@ -8,6 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON) # Refuses to compile on older versions of CX
 
 set(SHARED_SOURCE_FILES src/main.cpp)
 
+# Include the resource (executable metadata) file for windows only in windows.
+if (WIN32)
+	set(SHARED_SOURCE_FILES ${SHARED_SOURCE_FILES} res/resource.rc)
+endif()
+
 # Create an executable out of the provided source files.
 add_executable(LithoGen ${SHARED_SOURCE_FILES})
 

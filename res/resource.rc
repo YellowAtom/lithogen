@@ -1,0 +1,29 @@
+
+#include <Windows.h>
+
+LithoGenIcon ICON "icon.ico"
+
+VS_VERSION_INFO	VERSIONINFO
+FILEVERSION		1,0,0,0
+PRODUCTVERSION	1,0,0,0
+FILEOS			VOS_NT_WINDOWS32
+FILETYPE		VFT_APP
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904E4"
+		BEGIN
+			VALUE "FileDescription",	"LithoGen"
+			VALUE "FileVersion",		"1.0"
+			VALUE "ProductName",		"LithoGen"
+			VALUE "ProductVersion",		"1.0"
+			VALUE "OriginalFilename",	"lithogen.exe"
+			VALUE "InternalName",		"lithogen"
+        END
+	END
+
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1252 // "U.S. English", "Windows ANSI codepage"
+	END
+END
