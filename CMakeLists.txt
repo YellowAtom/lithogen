@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.30)
 project(LithoGen VERSION 1.0.0 LANGUAGES CXX)
 
-# Refuses to compile on older versions of CXX.
+# Refuse to compile on older versions of C++.
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -23,11 +23,12 @@ add_subdirectory(deps/imgui-1.91.7)
 
 set(SHARED_SOURCE_FILES src/main.cpp)
 
-# Include the resource (executable metadata) file for windows only in windows.
+# Include the resource (executable metadata) file for windows in windows only.
 if (WIN32)
 	# Create the executable, with additional files for Windows.
 	add_executable(App ${SHARED_SOURCE_FILES} res/resource.rc)
 
+	# Windows specific compiler definitions:
 	# WIN32_LEAN_AND_MEAN - Active optional windows api optimisation features.
 	# OS_WINDOWS - For the codebase to ask if the program will be compiling to windows.
 	target_compile_definitions(App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN)
