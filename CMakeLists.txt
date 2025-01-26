@@ -24,7 +24,6 @@ add_subdirectory(deps/glm-1.0.1)
 
 set(SHARED_SOURCE_FILES src/main.cpp)
 
-# Include the resource (executable metadata) file for windows in windows only.
 if (WIN32)
 	# Create the executable, with additional files for Windows.
 	add_executable(App ${SHARED_SOURCE_FILES} res/resource.rc)
@@ -38,7 +37,7 @@ if (WIN32)
 	target_link_libraries(App PRIVATE dwmapi)
 
 	# Set the application type to windowed and force the use of the default entry point main().
-	target_link_options(App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
+	#target_link_options(App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
 else()
 	# Create the executable.
 	add_executable(App ${SHARED_SOURCE_FILES})
