@@ -20,6 +20,7 @@ add_compile_definitions(GLFW_EXPOSE_NATIVE_WIN32)
 add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glad-2.0.8)
 add_subdirectory(deps/imgui-1.91.7)
+add_subdirectory(deps/glm-1.0.1)
 
 set(SHARED_SOURCE_FILES src/main.cpp)
 
@@ -47,4 +48,4 @@ endif()
 set_target_properties(App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(App PRIVATE glfw glad imgui)
+target_link_libraries(App PRIVATE glfw glad imgui glm)
