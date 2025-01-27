@@ -5,6 +5,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
+#include "glm/vec3.hpp"
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -153,17 +154,17 @@ int main(int argc, char* argv[]) {
 	io.IniFilename = nullptr; // Disable saving ImGui state, unneeded in this implementation.
 
 	// Demo triangle vertices.
-	constexpr float triangleVertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f
+	constexpr glm::vec3 triangleVertices[] = {
+		glm::vec3(-1.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(1.0f, -1.0f, 0.0f),
 	};
 
 	// Demo triangle normalised rgb values for each vertex.
-	constexpr float triangleColors[] = {
-		1.0f, 0.0f, 0.0f,
-		0.0f,1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f
+	constexpr glm::vec3 triangleColors[] = {
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f)
 	};
 
 	// Create a Vertex Array Object and make it active / bound.
@@ -178,7 +179,7 @@ int main(int argc, char* argv[]) {
 
 	// Push the vertices into the buffer and therefor into the GPU for later.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 	glEnableVertexAttribArray(0);
 
 	unsigned int vboColors;
@@ -187,7 +188,7 @@ int main(int argc, char* argv[]) {
 
 	// Do the same for the color data.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleColors), triangleColors, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 	glEnableVertexAttribArray(1);
 
 	// Unbind both objects.
