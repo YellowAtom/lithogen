@@ -195,7 +195,9 @@ int main(int argc, char* argv[]) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// ImGui button state.
-	bool drawTriangle = true;
+	bool drawPicture = true;
+	bool renderMesh = true;
+	bool exampleCheckbox = true;
 
 	while (!glfwWindowShouldClose(window)) {
 		// Set OpenGL clear render colour, the colour drawn if nothing else is.
@@ -206,7 +208,7 @@ int main(int argc, char* argv[]) {
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 
-		if (drawTriangle)
+		if (renderMesh)
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// Prepare ImGui at the start of a new frame.
@@ -224,6 +226,11 @@ int main(int argc, char* argv[]) {
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("View")) {
+				ImGui::MenuItem("Display Picture", nullptr, &drawPicture);
+				ImGui::MenuItem("Render Mesh", nullptr, &renderMesh);
+				ImGui::EndMenu();
+			}
 			ImGui::EndMainMenuBar();
 		}
 
@@ -236,7 +243,7 @@ int main(int argc, char* argv[]) {
 
 		ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 			// A test demonstration of ImGui features.
-			ImGui::Checkbox("Draw Triangle", &drawTriangle);
+			ImGui::Checkbox("Example Checkbox", &exampleCheckbox);
 		ImGui::End();
 
 		// Trigger an ImGui render.
