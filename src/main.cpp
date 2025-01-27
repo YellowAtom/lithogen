@@ -133,6 +133,11 @@ int main(int argc, char* argv[]) {
 	if (gladLoadGL(glfwGetProcAddress) == 0)
 		return 1;
 
+	// Vertex optimisation, don't draw the back side of a triangle.
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
+	glCullFace(GL_BACK);
+
 	// Configure the OpenGL viewport size when the window is resized, and run that calculation once to start.
 	glfwSetFramebufferSizeCallback(window, CalculateViewport);
 	CalculateViewport(window, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
