@@ -23,8 +23,8 @@ add_subdirectory(deps/imgui-1.91.7)
 add_subdirectory(deps/glm-1.0.1)
 
 set(SHARED_SOURCE_FILES src/main.cpp
-		src/render.cpp
-		src/render.h
+		src/display.cpp
+		src/display.h
 		src/constants.h
 		src/menu.cpp
 		src/menu.h)

@@ -1,7 +1,7 @@
 
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
-#include "render.h"
+#include "display.h"
 #include "menu.h"
 #include "constants.h"
 
@@ -58,13 +58,13 @@ int main(int argc, char* argv[]) {
 	if (gladLoadGL(glfwGetProcAddress) == 0)
 		return 1;
 
-	if (!RenderInit())
+	if (!DisplayInit())
 		return 1;
 
 	MenuInit();
 
 	while (!glfwWindowShouldClose(g_mainWindow)) {
-		RenderDraw();
+		DisplayDraw();
 		MenuDraw();
 
 		glfwSwapBuffers(g_mainWindow); // Push the prepared frame buffer to the screen.

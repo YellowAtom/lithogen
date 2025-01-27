@@ -12,12 +12,12 @@ extern GLFWwindow* g_mainWindow;
 unsigned int g_shaderProgram;
 unsigned int g_demoVAO;
 
-void RenderCalcViewport(GLFWwindow* window, int width, int height) {
+void DisplayCalcViewport(GLFWwindow* window, int width, int height) {
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
 	glViewport(GUI_SIDEPANEL_WIDTH, 0, width - GUI_SIDEPANEL_WIDTH, height - GUI_MENUBAR_HEIGHT);
 }
 
-bool RenderShaderInit() {
+bool DisplayShaderInit() {
 	g_shaderProgram = glCreateProgram();
 
 	// The GLSL source code, is compiled to SPIR-V and used at runtime. TODO: Make this compile at compile time not runtime.
@@ -87,7 +87,7 @@ bool RenderShaderInit() {
 	return true;
 }
 
-void RenderVAOInit() {
+void DisplayVAOInit() {
 	// Demo triangle vertices.
 	constexpr glm::vec3 triangleVertices[] = {
 		glm::vec3(-1.0f, -1.0f, 0.0f),
@@ -130,25 +130,25 @@ void RenderVAOInit() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-bool RenderInit() {
+bool DisplayInit() {
 	// Vertex optimisation, don't draw the back side of a triangle.
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glCullFace(GL_BACK);
 
 	// Configure the OpenGL viewport size when the window is resized, and run that calculation once to start.
-	glfwSetFramebufferSizeCallback(g_mainWindow, RenderCalcViewport);
-	RenderCalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+	glfwSetFramebufferSizeCallback(g_mainWindow, DisplayCalcViewport);
+	DisplayCalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 
-	RenderVAOInit();
+	DisplayVAOInit();
 
-	if (!RenderShaderInit())
+	if (!DisplayShaderInit())
 		return false;
 
 	return true;
 }
 
-void RenderDraw() {
+void DisplayDraw() {
 	// Set OpenGL clear render colour, the colour drawn if nothing else is.
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 	glClear(GL_COLOR_BUFFER_BIT); // Clear the frame to avoid any junk.
