@@ -207,8 +207,8 @@ int main(int argc, char* argv[]) {
 
 	while (!glfwWindowShouldClose(window)) {
 		// Set OpenGL clear render colour, the colour drawn if nothing else is.
-		glClearColor(0.341f, 0.349f, 0.431f, 1.0f); // Normalised RGB values, #57596e.
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
+		glClear(GL_COLOR_BUFFER_BIT); // Clear the frame to avoid any junk.
 
 		// Draw Demo Triangle.
 		glUseProgram(shaderProgram);
