@@ -156,6 +156,9 @@ void DisplayInit() {
 	glFrontFace(GL_CW);
 	glCullFace(GL_BACK);
 
+	// Set OpenGL clear render colour, the colour drawn if nothing else is.
+	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
+
 	// Configure the OpenGL viewport size when the window is resized, and run that calculation once to start.
 	glfwSetFramebufferSizeCallback(g_mainWindow, CalcViewport);
 	CalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
@@ -165,13 +168,10 @@ void DisplayInit() {
 }
 
 void DisplayDraw() {
-	// Set OpenGL clear render colour, the colour drawn if nothing else is.
-	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
 
-	// Draw Demo Triangle.
-	glBindVertexArray(g_demoVAO);
-
-	if (g_config.renderMesh)
+	if (g_config.renderMesh) {
+		glBindVertexArray(g_demoVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+	}
 }
