@@ -1,6 +1,9 @@
 # Jetbrains IDE Settings
-.idea
+/.idea
 
 # Build Files
-cmake-build-*
+/cmake-build-*
 /build/
+/app/*.exe
+/app/*.ilk
+/app/*.pdb

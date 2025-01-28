@@ -58,9 +58,7 @@ int main(int argc, char* argv[]) {
 	if (gladLoadGL(glfwGetProcAddress) == 0)
 		return 1;
 
-	if (!DisplayInit())
-		return 1;
-
+	DisplayInit();
 	MenuInit();
 
 	while (!glfwWindowShouldClose(g_mainWindow)) {

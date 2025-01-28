@@ -1,4 +1,4 @@
 #pragma once
 
-bool DisplayInit();
+void DisplayInit();
 void DisplayDraw();

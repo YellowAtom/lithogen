@@ -16,6 +16,9 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Global project precompiler definitions.
 add_compile_definitions(GLFW_EXPOSE_NATIVE_WIN32)
 
+# Place and debug compiled project in the app folder.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/app)
+
 # Include project dependencies.
 add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glad-2.0.8)

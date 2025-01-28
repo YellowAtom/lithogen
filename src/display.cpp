@@ -1,9 +1,10 @@
 
+#include <fstream>
 #include <iostream>
-#include <imgui.h>
+#include <string>
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
-#include "glm/vec3.hpp"
+#include "glm/glm.hpp"
 #include "constants.h"
 #include "menu.h"
 
@@ -12,64 +13,73 @@ extern GLFWwindow* g_mainWindow;
 unsigned int g_shaderProgram;
 unsigned int g_demoVAO;
 
-void DisplayCalcViewport(GLFWwindow* window, int width, int height) {
+void CalcViewport(GLFWwindow* window, int width, int height) {
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
 	glViewport(GUI_SIDEPANEL_WIDTH, 0, width - GUI_SIDEPANEL_WIDTH, height - GUI_MENUBAR_HEIGHT);
 }
 
-bool DisplayShaderInit() {
-	g_shaderProgram = glCreateProgram();
+unsigned int LoadShader(const char* pFilePath, const int shaderType) {
+	std::ifstream shaderFile(pFilePath);
 
-	// The GLSL source code, is compiled to SPIR-V and used at runtime. TODO: Make this compile at compile time not runtime.
-	const char* vertShaderSrc =
-		"#version 460 core\n"
-		"layout (location = 0) in vec3 in_position;\n"
-		"layout (location = 1) in vec3 in_color;\n"
-		"layout (location = 0) out vec3 frag_color;\n"
-		"void main() {\n"
-		"	frag_color = in_color;\n"
-		"	gl_Position = vec4(in_position, 1.0f);\n"
-		"}\0";
+	if (!shaderFile.is_open()) {
+		std::cout << "Error opening shader file \"" << pFilePath << "\"" << std::endl;
+		exit(1);
+	}
 
-	const char* fragShaderSrc =
-		"#version 460 core\n"
-		"layout (location = 0) in vec3 flag_color;\n"
-		"layout (location = 0) out vec4 out_color;\n"
-		"void main() {\n"
-		"	out_color = vec4(flag_color, 1.0f);\n"
-		"}\0";
+	std::string shaderStr, line;
+
+	while (getline(shaderFile, line)) {
+		shaderStr.append(line);
+		shaderStr.append("\n");
+	}
+
+	const char* shaderSrc = shaderStr.data();
+	unsigned int shader = glCreateShader(shaderType);
+
+	if (shader == 0) {
+		std::cout << "Error creating shader type" << std::endl;
+		exit(1);
+	}
+
+	const char* shaders[1];
+	shaders[0] = shaderSrc;
+
+	int lengths[1];
+	lengths[0] = strlen(shaderSrc);
 
 	int success;
 
-	// Compile shader.
-	unsigned int vertShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertShader, 1, &vertShaderSrc, nullptr);
-	glCompileShader(vertShader);
-	glGetShaderiv(vertShader, GL_COMPILE_STATUS, &success);
+	glShaderSource(shader, 1, shaders, lengths);
+	glCompileShader(shader);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
 	if (!success) {
 		char infoLog[512];
-		glGetShaderInfoLog(vertShader, 512, nullptr, infoLog);
-		std::cout << "Failed to compile vertex shader: \n" << infoLog << std::endl;
-		return false;
+		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+		std::cout << "Failed to compile shader \"" << pFilePath << "\": \n" << infoLog << std::endl;
+		exit(1);
 	}
 
-	// Compile shader.
-	unsigned int fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragShader, 1, &fragShaderSrc, nullptr);
-	glCompileShader(fragShader);
-	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
+	return shader;
+}
 
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(fragShader, 512, nullptr, infoLog);
-		std::cout << "Failed to compile fragment shader: \n" << infoLog << std::endl;
-		return false;
+void CompileShaders() {
+	g_shaderProgram = glCreateProgram();
+
+	if (g_shaderProgram == 0) {
+		std::cout << "Error creating shader program" << std::endl;
+		exit(1);
 	}
+
+	unsigned int vertShader = LoadShader("./shaders/vertex.glsl", GL_VERTEX_SHADER);
+	unsigned int fragShader = LoadShader("./shaders/fragment.glsl", GL_FRAGMENT_SHADER);
 
 	// Attach the finalised shaders to a shader program to be used by the rest of the program.
 	glAttachShader(g_shaderProgram, vertShader);
 	glAttachShader(g_shaderProgram, fragShader);
+
+	int success;
+
 	glLinkProgram(g_shaderProgram);
 	glGetProgramiv(g_shaderProgram, GL_LINK_STATUS, &success);
 
@@ -77,17 +87,27 @@ bool DisplayShaderInit() {
 		char infoLog[512];
 		glGetProgramInfoLog(g_shaderProgram, 512, nullptr, infoLog);
 		std::cout << "Failed to link shader program: \n" << infoLog << std::endl;
-		return false;
+		exit(1);
 	}
+
+	glValidateProgram(g_shaderProgram);
+	glGetProgramiv(g_shaderProgram, GL_VALIDATE_STATUS, &success);
+
+	if (!success) {
+		char infoLog[512];
+		glGetProgramInfoLog(g_shaderProgram, 512, nullptr, infoLog);
+		std::cout << "Failed to validate shader program: \n" << infoLog << std::endl;
+		exit(1);
+	}
+
+	glUseProgram(g_shaderProgram);
 
 	// Clean up shaders now they are inside the shader program.
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
-
-	return true;
 }
 
-void DisplayVAOInit() {
+void VAOInit() {
 	// Demo triangle vertices.
 	constexpr glm::vec3 triangleVertices[] = {
 		glm::vec3(-1.0f, -1.0f, 0.0f),
@@ -130,31 +150,26 @@ void DisplayVAOInit() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-bool DisplayInit() {
+void DisplayInit() {
 	// Vertex optimisation, don't draw the back side of a triangle.
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glCullFace(GL_BACK);
 
 	// Configure the OpenGL viewport size when the window is resized, and run that calculation once to start.
-	glfwSetFramebufferSizeCallback(g_mainWindow, DisplayCalcViewport);
-	DisplayCalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+	glfwSetFramebufferSizeCallback(g_mainWindow, CalcViewport);
+	CalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 
-	DisplayVAOInit();
-
-	if (!DisplayShaderInit())
-		return false;
-
-	return true;
+	VAOInit();
+	CompileShaders();
 }
 
 void DisplayDraw() {
 	// Set OpenGL clear render colour, the colour drawn if nothing else is.
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
-	glClear(GL_COLOR_BUFFER_BIT); // Clear the frame to avoid any junk.
+	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
 
 	// Draw Demo Triangle.
-	glUseProgram(g_shaderProgram);
 	glBindVertexArray(g_demoVAO);
 
 	if (g_config.renderMesh)
