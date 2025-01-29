@@ -290,7 +290,7 @@ void DisplayInit() {
 void DisplayDraw() {
 	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
 
-	if (g_config.renderMesh) {
+	if (g_config.drawPreview) {
 		RenderObject();
 	}
 }

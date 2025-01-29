@@ -40,8 +40,8 @@ void MenuDraw() {
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("View")) {
-			ImGui::MenuItem("Display Picture", nullptr, &g_config.drawPicture);
-			ImGui::MenuItem("Render Mesh", nullptr, &g_config.renderMesh);
+			ImGui::MenuItem("Show Source", nullptr, &g_config.drawSource);
+			ImGui::MenuItem("Show Preview", nullptr, &g_config.drawPreview);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Help")) {

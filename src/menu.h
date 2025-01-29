@@ -1,8 +1,8 @@
 #pragma once
 
 struct MenuConfig {
-	bool drawPicture = true;
-	bool renderMesh = true;
+	bool drawSource = true;
+	bool drawPreview = true;
 	bool exampleCheckbox = true;
 };
 
