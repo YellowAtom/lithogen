@@ -135,7 +135,7 @@ void InitShaders() {
 	glDeleteShader(fragShader);
 }
 
-void CreateEntity() {
+void CreateObject() {
 	// Template data for a cube.
 	const Vertex vertices[] = {
 		Vertex(0.5f, 0.5f, 0.5f),
@@ -284,7 +284,7 @@ void DisplayInit() {
 	CalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 
 	InitShaders();
-	CreateEntity();
+	CreateObject();
 }
 
 void DisplayDraw() {
