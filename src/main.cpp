@@ -1,4 +1,6 @@
 
+#include <cstdlib>
+#include <process.h>
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
 #include "display.h"
@@ -30,6 +32,9 @@ void ConfigureWindows(GLFWwindow* window) {
 #endif
 
 int main(int argc, char* argv[]) {
+	// Seed any calls to rand() in the application with the process id, will be different every time.
+	srand(_getpid());
+
 	// Initialize the GLFW3 library.
 	if (!glfwInit())
 		return 1;

@@ -1,6 +1,6 @@
 #version 460 core
 
-layout (location = 0) in vec3 frag_color;
+in vec3 frag_color;
 out vec4 out_color;
 
 void main() {

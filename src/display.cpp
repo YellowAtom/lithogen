@@ -5,6 +5,7 @@
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
 #include "glm/glm.hpp"
+#include "glm/ext.hpp"
 #include "constants.h"
 #include "menu.h"
 
@@ -12,10 +13,37 @@ extern MenuConfig g_config;
 extern GLFWwindow* g_mainWindow;
 unsigned int g_shaderProgram;
 unsigned int g_demoVAO;
+int g_viewportWidth;
+int g_viewportHeight;
+float g_aspectRatio;
+
+// A struct to contain data for each vertex.
+struct Vertex {
+	glm::vec3 position{};
+	glm::vec3 color{};
+
+	Vertex() = default;
+
+	Vertex(float x, float y, float z) {
+		position = glm::vec3(x, y, z);
+
+		// Color is temporally randomised for testing.
+		color = glm::vec3(
+			static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+			static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+			static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
+		);
+	}
+};
 
 void CalcViewport(GLFWwindow* window, int width, int height) {
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
-	glViewport(GUI_SIDEPANEL_WIDTH, 0, width - GUI_SIDEPANEL_WIDTH, height - GUI_MENUBAR_HEIGHT);
+	// The render calculations need access to this data also.
+	g_viewportWidth = width - GUI_SIDEPANEL_WIDTH;
+	g_viewportHeight = height - GUI_MENUBAR_HEIGHT;
+	g_aspectRatio = static_cast<float>(g_viewportWidth) / static_cast<float>(g_viewportHeight);
+
+	glViewport(GUI_SIDEPANEL_WIDTH, 0, g_viewportWidth, g_viewportHeight);
 }
 
 unsigned int LoadShader(const char* pFilePath, const int shaderType) {
@@ -63,7 +91,7 @@ unsigned int LoadShader(const char* pFilePath, const int shaderType) {
 	return shader;
 }
 
-void CompileShaders() {
+void InitShaders() {
 	g_shaderProgram = glCreateProgram();
 
 	if (g_shaderProgram == 0) {
@@ -107,47 +135,139 @@ void CompileShaders() {
 	glDeleteShader(fragShader);
 }
 
-void VAOInit() {
-	// Demo triangle vertices.
-	constexpr glm::vec3 triangleVertices[] = {
-		glm::vec3(-1.0f, -1.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(1.0f, -1.0f, 0.0f),
+void CreateEntity() {
+	// Template data for a cube.
+	const Vertex vertices[] = {
+		Vertex(0.5f, 0.5f, 0.5f),
+		Vertex(-0.5f, 0.5f, -0.5f),
+		Vertex(-0.5f, 0.5f, 0.5f),
+		Vertex(0.5f, -0.5f, -0.5f),
+		Vertex(-0.5f, -0.5f, -0.5f),
+		Vertex(0.5f, 0.5f, -0.5f),
+		Vertex(0.5f, -0.5f, 0.5f),
+		Vertex(-0.5f, -0.5f, 0.5f)
 	};
 
-	// Demo triangle normalised rgb values for each vertex.
-	constexpr glm::vec3 triangleColors[] = {
-		glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 1.0f)
+	const unsigned int indices[] = {
+		0, 1, 2,
+		1, 3, 4,
+		5, 6, 3,
+		7, 3, 6,
+		2, 4, 7,
+		0, 7, 6,
+		0, 5, 1,
+		1, 5, 3,
+		5, 0, 6,
+		7, 4, 3,
+		2, 1, 4,
+		0, 2, 7
 	};
 
-	// Create a Vertex Array Object and make it active / bound.
 	glGenVertexArrays(1, &g_demoVAO);
 	glBindVertexArray(g_demoVAO);
 
-	// Create a Vertex Buffer Object and make it active / bound.
-	unsigned int vboVertices;
-	glGenBuffers(1, &vboVertices);
-	glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
+	// Allocate and configure the buffers.
+	unsigned int VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	// Push the vertices into the buffer and therefor into the GPU for later.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	unsigned int IBO;
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	// Bind the buffers to the VAO.
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+	// Tell the driver how to read position from the buffer.
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
-	unsigned int vboColors;
-	glGenBuffers(1, &vboColors);
-	glBindBuffer(GL_ARRAY_BUFFER, vboColors);
-
-	// Do the same for the color data.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleColors), triangleColors, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	// Tell the driver how to read color from the buffer.
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(sizeof(glm::vec3)));
 
-	// Unbind both objects.
+	// Unbind.
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void RenderObject() {
+	// World space translation for the object.
+	// Can be adjusted through x3, y3 and z3.
+	static constexpr glm::mat4 translation(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 2.0f, 1.0f
+	);
+
+	// Progress rotation every frame.
+	static float scale = 0.0f;
+	scale += 0.01f;
+
+	// World space rotation.
+	const glm::mat4 rotation(
+		cosf(scale), 0.0f, sinf(scale), 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		-sinf(scale), 0.0f, cosf(scale), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	// The world space matrix.
+	glm::mat4 world = translation * rotation;
+
+	// Camera position and orientation as uvn.
+	glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
+	glm::vec3 u(1.0f, 0.0f, 0.0f);
+	glm::vec3 v(0.0f, 1.0f, 0.0f);
+	glm::vec3 n(0.0f, 0.0f, 1.0f);
+
+	// View matrix calculated from camera position.
+	glm::mat4 view(
+		u.x, v.x, n.x, 0.0f,
+		u.y, v.y, n.y, 0.0f,
+		u.z, v.z, n.z, 0.0f,
+		-cameraPos.x, -cameraPos.y, -cameraPos.z, 1.0f
+	);
+
+	// Field of view, near z clip plane, far z clip plane.
+	static constexpr float FOV = 90.0f;
+	static constexpr float nearZ = 1.0f;
+	static constexpr float farZ = 10.0f;
+
+	static const float tanHalfFOV = tanf(glm::radians(FOV / 2));
+	static const float d = 1.0f / tanHalfFOV;
+
+	static constexpr float zRange = nearZ - farZ;
+	static constexpr float a = (-farZ - nearZ) / zRange;
+	static constexpr float b = 2.0f * farZ *  nearZ / zRange;
+
+	// The projection matrix. calculated form aspect ratio, fov and clip planes.
+	const glm::mat4 projection(
+		d / g_aspectRatio, 0.0f, 0.0f, 0.0f,
+		0.0f, d, 0.0f, 0.0f,
+		0.0f, 0.0f, a, 1.0f,
+		0.0f, 0.0f, b, 0.0f
+	);
+
+	// The World View Projection matrix.
+	glm::mat4 wvp = projection * view * world;
+
+	// Pass the completed matrix to the GPU to be applied in the shader to the vector position.
+	glUniformMatrix4fv(0, 1, GL_FALSE, value_ptr(wvp));
+
+	// Bind the VAO referencing the vertex and indices buffers.
+	glBindVertexArray(g_demoVAO);
+
+	// Draw the given data to the screen.
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+
+	// Unbind the VAO to ensure a clear OpenGL state.
+	glBindVertexArray(0);
 }
 
 void DisplayInit() {
@@ -163,15 +283,14 @@ void DisplayInit() {
 	glfwSetFramebufferSizeCallback(g_mainWindow, CalcViewport);
 	CalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 
-	VAOInit();
-	CompileShaders();
+	InitShaders();
+	CreateEntity();
 }
 
 void DisplayDraw() {
 	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
 
 	if (g_config.renderMesh) {
-		glBindVertexArray(g_demoVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		RenderObject();
 	}
 }
