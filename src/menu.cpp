@@ -21,7 +21,7 @@ void MenuInit() {
 	io.IniFilename = nullptr; // Disable saving ImGui state, unneeded in this implementation.
 }
 
-bool openMenu = false;
+bool openAbout = false;
 
 void MenuDraw() {
 	// Prepare ImGui at the start of a new frame.
@@ -46,7 +46,7 @@ void MenuDraw() {
 		}
 		if (ImGui::BeginMenu("Help")) {
 			if (ImGui::MenuItem("About")) {
-				openMenu = true;
+				openAbout = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -68,8 +68,8 @@ void MenuDraw() {
 	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 	ImGui::SetNextWindowPos(center);
 
-	if (openMenu) {
-		ImGui::Begin("About", &openMenu, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+	if (openAbout) {
+		ImGui::Begin("About", &openAbout, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 		ImGui::Text("Version: 1.0");
 		ImGui::End();
 	}
