@@ -21,6 +21,8 @@ void MenuInit() {
 	io.IniFilename = nullptr; // Disable saving ImGui state, unneeded in this implementation.
 }
 
+bool openMenu = false;
+
 void MenuDraw() {
 	// Prepare ImGui at the start of a new frame.
 	ImGui_ImplOpenGL3_NewFrame();
@@ -42,6 +44,12 @@ void MenuDraw() {
 			ImGui::MenuItem("Render Mesh", nullptr, &g_config.renderMesh);
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Help")) {
+			if (ImGui::MenuItem("About")) {
+				openMenu = true;
+			}
+			ImGui::EndMenu();
+		}
 		ImGui::EndMainMenuBar();
 	}
 
@@ -50,12 +58,21 @@ void MenuDraw() {
 
 	// Push the sidepanel down to make room for the menu bar.
 	ImGui::SetNextWindowPos(ImVec2(0, GUI_MENUBAR_HEIGHT));
-	ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, height - GUI_MENUBAR_HEIGHT));
+	ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, static_cast<float>(height) - GUI_MENUBAR_HEIGHT));
 
 	ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 	// A test demonstration of ImGui features.
 	ImGui::Checkbox("Example Checkbox", &g_config.exampleCheckbox);
 	ImGui::End();
+
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(center);
+
+	if (openMenu) {
+		ImGui::Begin("About", &openMenu, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+		ImGui::Text("Version: 1.0");
+		ImGui::End();
+	}
 
 	// Trigger an ImGui render.
 	ImGui::Render();
