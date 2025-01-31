@@ -195,70 +195,106 @@ void CreateObject() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void RenderObject() {
-	// World space translation for the object.
-	// Can be adjusted through x3, y3 and z3.
-	static constexpr glm::mat4 translation(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 2.0f, 1.0f
-	);
+glm::mat4 CreateProjection(const float fov, const float nearZ, const float farZ) {
+	const float tanHalfFOV = tanf(glm::radians(fov / 2));
+	const float d = 1.0f / tanHalfFOV;
 
-	// Progress rotation every frame.
-	static float scale = 0.0f;
-	scale += 0.01f;
-
-	// World space rotation.
-	const glm::mat4 rotation(
-		cosf(scale), 0.0f, sinf(scale), 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		-sinf(scale), 0.0f, cosf(scale), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	// The world space matrix.
-	glm::mat4 world = translation * rotation;
-
-	// Camera position and orientation as uvn.
-	glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
-	glm::vec3 u(1.0f, 0.0f, 0.0f);
-	glm::vec3 v(0.0f, 1.0f, 0.0f);
-	glm::vec3 n(0.0f, 0.0f, 1.0f);
-
-	// View matrix calculated from camera position.
-	glm::mat4 view(
-		u.x, v.x, n.x, 0.0f,
-		u.y, v.y, n.y, 0.0f,
-		u.z, v.z, n.z, 0.0f,
-		-cameraPos.x, -cameraPos.y, -cameraPos.z, 1.0f
-	);
-
-	// Field of view, near z clip plane, far z clip plane.
-	static constexpr float FOV = 90.0f;
-	static constexpr float nearZ = 1.0f;
-	static constexpr float farZ = 10.0f;
-
-	static const float tanHalfFOV = tanf(glm::radians(FOV / 2));
-	static const float d = 1.0f / tanHalfFOV;
-
-	static constexpr float zRange = nearZ - farZ;
-	static constexpr float a = (-farZ - nearZ) / zRange;
-	static constexpr float b = 2.0f * farZ *  nearZ / zRange;
+	float zRange = nearZ - farZ;
+	float a = (-farZ - nearZ) / zRange;
+	float b = 2.0f * farZ * nearZ / zRange;
 
 	// The projection matrix. calculated form aspect ratio, fov and clip planes.
-	const glm::mat4 projection(
+	return {
 		d / g_aspectRatio, 0.0f, 0.0f, 0.0f,
 		0.0f, d, 0.0f, 0.0f,
 		0.0f, 0.0f, a, 1.0f,
 		0.0f, 0.0f, b, 0.0f
+	};
+}
+
+glm::mat4 CreateView(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) {
+	glm::vec3 n = normalize(target);
+	glm::vec3 u = normalize(cross(normalize(up), n));
+	glm::vec3 v = cross(n, u);
+
+	return {
+		u.x, v.x, n.x, 0.0f,
+		u.y, v.y, n.y, 0.0f,
+		u.z, v.z, n.z, 0.0f,
+		-position.x, -position.y, -position.z, 1.0f
+	};
+}
+
+glm::mat4 CreateModel(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
+	// Apply scale to the matrix.
+	glm::mat4 s(
+		scale.x, 0.0f, 0.0f, 0.0f,
+		0.0f, scale.y, 0.0f, 0.0f,
+		0.0f, 0.0f, scale.z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	// The World View Projection matrix.
-	glm::mat4 wvp = projection * view * world;
+	// Apply translation / position to the matrix.
+	glm::mat4 t(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		position.x, position.y, position.z, 1.0f
+	);
+
+	// Apply rotation to the matrix.
+	float rotateX = glm::radians(rotation.x);
+	float rotateY = glm::radians(rotation.y);
+	float rotateZ = glm::radians(rotation.z);
+
+	glm::mat4 rx(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, cosf(rotateX), sinf(rotateX), 0.0f,
+		0.0f, -sinf(rotateX), cosf(rotateX), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	glm::mat4 ry(
+		cosf(rotateY), 0.0f, sinf(rotateY), 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		-sinf(rotateY), 0.0f, cosf(rotateY), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	glm::mat4 rz(
+		cosf(rotateZ), 0.0f, sinf(rotateZ), 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		-sinf(rotateZ), 0.0f, cosf(rotateZ), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	// Combine the matrices into the world matrix in the correct order.
+	return t * (rz * ry * rx) * s;
+}
+
+void RenderObject() {
+	static float rotation = 0.0f;
+	rotation += 0.5f;
+
+	glm::mat4 model = CreateModel(
+		glm::vec3(0.0f, 0.0f, 2.0f),
+		glm::vec3(rotation, rotation, 0.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
+
+	glm::mat4 view = CreateView(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	);
+
+	glm::mat4 projection = CreateProjection(90.0f, 1.0f, 10.0f);
+
+	// The Model View Projection matrix.
+	glm::mat4 mvp = projection * view * model;
 
 	// Pass the completed matrix to the GPU to be applied in the shader to the vector position.
-	glUniformMatrix4fv(0, 1, GL_FALSE, value_ptr(wvp));
+	glUniformMatrix4fv(glGetUniformLocation(g_shaderProgram, "mvp"), 1, GL_FALSE, value_ptr(mvp));
 
 	// Bind the VAO referencing the vertex and indices buffers.
 	glBindVertexArray(g_demoVAO);
