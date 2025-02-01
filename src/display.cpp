@@ -195,7 +195,7 @@ void CreateObject() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-glm::mat4 CreateProjection(const float fov, const float nearZ, const float farZ) {
+void CreateProjection(glm::mat4& mvp, const float fov, const float nearZ, const float farZ) {
 	const float tanHalfFOV = tanf(glm::radians(fov / 2));
 	const float d = 1.0f / tanHalfFOV;
 
@@ -204,28 +204,28 @@ glm::mat4 CreateProjection(const float fov, const float nearZ, const float farZ)
 	float b = 2.0f * farZ * nearZ / zRange;
 
 	// The projection matrix. calculated form aspect ratio, fov and clip planes.
-	return {
+	mvp *= glm::mat4(
 		d / g_aspectRatio, 0.0f, 0.0f, 0.0f,
 		0.0f, d, 0.0f, 0.0f,
 		0.0f, 0.0f, a, 1.0f,
 		0.0f, 0.0f, b, 0.0f
-	};
+	);
 }
 
-glm::mat4 CreateView(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) {
+void CreateView(glm::mat4& mvp, const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) {
 	glm::vec3 n = normalize(target);
 	glm::vec3 u = normalize(cross(normalize(up), n));
 	glm::vec3 v = cross(n, u);
 
-	return {
+	mvp *= glm::mat4(
 		u.x, v.x, n.x, 0.0f,
 		u.y, v.y, n.y, 0.0f,
 		u.z, v.z, n.z, 0.0f,
 		-position.x, -position.y, -position.z, 1.0f
-	};
+	);
 }
 
-glm::mat4 CreateModel(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
+void CreateModel(glm::mat4& mvp, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
 	// Apply scale to the matrix.
 	glm::mat4 s(
 		scale.x, 0.0f, 0.0f, 0.0f,
@@ -269,29 +269,29 @@ glm::mat4 CreateModel(const glm::vec3& position, const glm::vec3& rotation, cons
 	);
 
 	// Combine the matrices into the world matrix in the correct order.
-	return t * (rz * ry * rx) * s;
+	mvp *= t * (rz * ry * rx) * s;
 }
 
 void RenderObject() {
 	static float rotation = 0.0f;
 	rotation += 0.5f;
 
-	glm::mat4 model = CreateModel(
-		glm::vec3(0.0f, 0.0f, 2.0f),
-		glm::vec3(rotation, rotation, 0.0f),
-		glm::vec3(1.0f, 1.0f, 1.0f)
-	);
+	// The model view projection matrix.
+	glm::mat4 mvp(1.0f);
 
-	glm::mat4 view = CreateView(
+	CreateProjection(mvp, 90.0f, 1.0f, 10.0f);
+
+	CreateView(mvp,
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	glm::mat4 projection = CreateProjection(90.0f, 1.0f, 10.0f);
-
-	// The Model View Projection matrix.
-	glm::mat4 mvp = projection * view * model;
+	CreateModel(mvp,
+		glm::vec3(0.0f, 0.0f, 2.0f),
+		glm::vec3(rotation, rotation, 0.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
 
 	// Pass the completed matrix to the GPU to be applied in the shader to the vector position.
 	glUniformMatrix4fv(glGetUniformLocation(g_shaderProgram, "mvp"), 1, GL_FALSE, value_ptr(mvp));
