@@ -213,16 +213,25 @@ void CreateProjection(glm::mat4& mvp, const float fov, const float nearZ, const 
 }
 
 void CreateView(glm::mat4& mvp, const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) {
+	glm::mat4 cameraTranslation(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		-position.x, -position.y, -position.z, 1.0f
+	);
+
 	glm::vec3 n = normalize(target);
-	glm::vec3 u = normalize(cross(normalize(up), n));
+	glm::vec3 u = normalize(cross(up, n));
 	glm::vec3 v = cross(n, u);
 
-	mvp *= glm::mat4(
+	glm::mat4 cameraRotation(
 		u.x, v.x, n.x, 0.0f,
 		u.y, v.y, n.y, 0.0f,
 		u.z, v.z, n.z, 0.0f,
-		-position.x, -position.y, -position.z, 1.0f
+		0.0f, 0.0f, 0.0f, 1.0f
 	);
+
+	mvp *= cameraTranslation * cameraRotation;
 }
 
 void CreateModel(glm::mat4& mvp, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
