@@ -2,49 +2,51 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 #include "constants.h"
-#include "menu.h"
+#include "matrix_math.h"
+#include "classes/display_data.h"
+#include "classes/menu_config.h"
+#include "classes/entity.h"
+#include "classes/model.h"
+#include "classes/vertex.h"
 
-extern MenuConfig g_config;
-extern GLFWwindow* g_mainWindow;
-unsigned int g_shaderProgram;
-unsigned int g_demoVAO;
-int g_viewportWidth;
-int g_viewportHeight;
-float g_aspectRatio;
+// GLFW callback functions.
 
-// A struct to contain data for each vertex.
-struct Vertex {
-	glm::vec3 position{};
-	glm::vec3 color{};
+void cursorPosCallback(GLFWwindow* window, double x, double y) {
+	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
 
-	Vertex() = default;
+	// TODO: Rotating the cube too much will make this inaccurate, find a way.
 
-	Vertex(float x, float y, float z) {
-		position = glm::vec3(x, y, z);
+	// Store previous mouse location to calculate difference.
+	// Static allows variable to persist through multiple function calls.
+	static double previousX = 0;
+	static double previousY = 0;
 
-		// Color is temporally randomised for testing.
-		color = glm::vec3(
-			static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
-			static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
-			static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
-		);
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == true) {
+		// Apply the difference between the previous and current mouse location to the entity's rotation.
+		display->entity.AddRotation(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
-};
 
-void CalcViewport(GLFWwindow* window, int width, int height) {
-	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
-	// The render calculations need access to this data also.
-	g_viewportWidth = width - GUI_SIDEPANEL_WIDTH;
-	g_viewportHeight = height - GUI_MENUBAR_HEIGHT;
-	g_aspectRatio = static_cast<float>(g_viewportWidth) / static_cast<float>(g_viewportHeight);
-
-	glViewport(GUI_SIDEPANEL_WIDTH, 0, g_viewportWidth, g_viewportHeight);
+	previousX = x;
+	previousY = y;
 }
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+	// Recalculate viewport size when the window is resized.
+	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+	display->CalcViewport(window, width, height);
+}
+
+// Shader initialization functions.
 
 unsigned int LoadShader(const char* pFilePath, const int shaderType) {
 	std::ifstream shaderFile(pFilePath);
@@ -91,10 +93,10 @@ unsigned int LoadShader(const char* pFilePath, const int shaderType) {
 	return shader;
 }
 
-void InitShaders() {
-	g_shaderProgram = glCreateProgram();
+unsigned int InitShaders() {
+	const unsigned int shaderProgram = glCreateProgram();
 
-	if (g_shaderProgram == 0) {
+	if (shaderProgram == 0) {
 		std::cout << "Error creating shader program" << std::endl;
 		exit(1);
 	}
@@ -103,219 +105,50 @@ void InitShaders() {
 	unsigned int fragShader = LoadShader("./shaders/fragment.glsl", GL_FRAGMENT_SHADER);
 
 	// Attach the finalised shaders to a shader program to be used by the rest of the program.
-	glAttachShader(g_shaderProgram, vertShader);
-	glAttachShader(g_shaderProgram, fragShader);
+	glAttachShader(shaderProgram, vertShader);
+	glAttachShader(shaderProgram, fragShader);
 
 	int success;
 
-	glLinkProgram(g_shaderProgram);
-	glGetProgramiv(g_shaderProgram, GL_LINK_STATUS, &success);
+	glLinkProgram(shaderProgram);
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
 	if (!success) {
 		char infoLog[512];
-		glGetProgramInfoLog(g_shaderProgram, 512, nullptr, infoLog);
+		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
 		std::cout << "Failed to link shader program: \n" << infoLog << std::endl;
 		exit(1);
 	}
 
-	glValidateProgram(g_shaderProgram);
-	glGetProgramiv(g_shaderProgram, GL_VALIDATE_STATUS, &success);
+	glValidateProgram(shaderProgram);
+	glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
 
 	if (!success) {
 		char infoLog[512];
-		glGetProgramInfoLog(g_shaderProgram, 512, nullptr, infoLog);
+		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
 		std::cout << "Failed to validate shader program: \n" << infoLog << std::endl;
 		exit(1);
 	}
 
-	glUseProgram(g_shaderProgram);
+	glUseProgram(shaderProgram);
 
 	// Clean up shaders now they are inside the shader program.
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
+
+	return shaderProgram;
 }
 
-void CreateObject() {
-	// Template data for a cube.
-	const Vertex vertices[] = {
-		Vertex(0.5f, 0.5f, 0.5f),
-		Vertex(-0.5f, 0.5f, -0.5f),
-		Vertex(-0.5f, 0.5f, 0.5f),
-		Vertex(0.5f, -0.5f, -0.5f),
-		Vertex(-0.5f, -0.5f, -0.5f),
-		Vertex(0.5f, 0.5f, -0.5f),
-		Vertex(0.5f, -0.5f, 0.5f),
-		Vertex(-0.5f, -0.5f, 0.5f)
+// Temporary random colour function.
+glm::vec3 RandomColor() {
+	return {
+		static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+		static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+		static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
 	};
-
-	const unsigned int indices[] = {
-		0, 1, 2,
-		1, 3, 4,
-		5, 6, 3,
-		7, 3, 6,
-		2, 4, 7,
-		0, 7, 6,
-		0, 5, 1,
-		1, 5, 3,
-		5, 0, 6,
-		7, 4, 3,
-		2, 1, 4,
-		0, 2, 7
-	};
-
-	glGenVertexArrays(1, &g_demoVAO);
-	glBindVertexArray(g_demoVAO);
-
-	// Allocate and configure the buffers.
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	unsigned int IBO;
-	glGenBuffers(1, &IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	// Bind the buffers to the VAO.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-
-	// Tell the driver how to read position from the buffer.
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-	// Tell the driver how to read color from the buffer.
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(sizeof(glm::vec3)));
-
-	// Unbind.
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void CreateProjection(glm::mat4& mvp, const float fov, const float nearZ, const float farZ) {
-	const float tanHalfFOV = tanf(glm::radians(fov / 2));
-	const float d = 1.0f / tanHalfFOV;
-
-	float zRange = nearZ - farZ;
-	float a = (-farZ - nearZ) / zRange;
-	float b = 2.0f * farZ * nearZ / zRange;
-
-	// The projection matrix. calculated form aspect ratio, fov and clip planes.
-	mvp *= glm::mat4(
-		d / g_aspectRatio, 0.0f, 0.0f, 0.0f,
-		0.0f, d, 0.0f, 0.0f,
-		0.0f, 0.0f, a, 1.0f,
-		0.0f, 0.0f, b, 0.0f
-	);
-}
-
-void CreateView(glm::mat4& mvp, const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) {
-	glm::mat4 cameraTranslation(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		-position.x, -position.y, -position.z, 1.0f
-	);
-
-	glm::vec3 n = normalize(target);
-	glm::vec3 u = normalize(cross(up, n));
-	glm::vec3 v = cross(n, u);
-
-	glm::mat4 cameraRotation(
-		u.x, v.x, n.x, 0.0f,
-		u.y, v.y, n.y, 0.0f,
-		u.z, v.z, n.z, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	mvp *= cameraTranslation * cameraRotation;
-}
-
-void CreateModel(glm::mat4& mvp, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
-	// Apply scale to the matrix.
-	glm::mat4 s(
-		scale.x, 0.0f, 0.0f, 0.0f,
-		0.0f, scale.y, 0.0f, 0.0f,
-		0.0f, 0.0f, scale.z, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	// Apply translation / position to the matrix.
-	glm::mat4 t(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		position.x, position.y, position.z, 1.0f
-	);
-
-	// Apply rotation to the matrix.
-	float rotateX = glm::radians(rotation.x);
-	float rotateY = glm::radians(rotation.y);
-	float rotateZ = glm::radians(rotation.z);
-
-	glm::mat4 rx(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, cosf(rotateX), sinf(rotateX), 0.0f,
-		0.0f, -sinf(rotateX), cosf(rotateX), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	glm::mat4 ry(
-		cosf(rotateY), 0.0f, sinf(rotateY), 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		-sinf(rotateY), 0.0f, cosf(rotateY), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	glm::mat4 rz(
-		cosf(rotateZ), 0.0f, sinf(rotateZ), 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		-sinf(rotateZ), 0.0f, cosf(rotateZ), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	// Combine the matrices into the world matrix in the correct order.
-	mvp *= t * (rz * ry * rx) * s;
-}
-
-void RenderObject() {
-	static float rotation = 0.0f;
-	rotation += 0.5f;
-
-	// The model view projection matrix.
-	glm::mat4 mvp(1.0f);
-
-	CreateProjection(mvp, 90.0f, 1.0f, 10.0f);
-
-	CreateView(mvp,
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-
-	CreateModel(mvp,
-		glm::vec3(0.0f, 0.0f, 2.0f),
-		glm::vec3(rotation, rotation, 0.0f),
-		glm::vec3(1.0f, 1.0f, 1.0f)
-	);
-
-	// Pass the completed matrix to the GPU to be applied in the shader to the vector position.
-	glUniformMatrix4fv(glGetUniformLocation(g_shaderProgram, "mvp"), 1, GL_FALSE, value_ptr(mvp));
-
-	// Bind the VAO referencing the vertex and indices buffers.
-	glBindVertexArray(g_demoVAO);
-
-	// Draw the given data to the screen.
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
-
-	// Unbind the VAO to ensure a clear OpenGL state.
-	glBindVertexArray(0);
-}
-
-void DisplayInit() {
+DisplayData* DisplayInit(GLFWwindow* window) {
 	// Vertex optimisation, don't draw the back side of a triangle.
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
@@ -324,18 +157,141 @@ void DisplayInit() {
 	// Set OpenGL clear render colour, the colour drawn if nothing else is.
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 
-	// Configure the OpenGL viewport size when the window is resized, and run that calculation once to start.
-	glfwSetFramebufferSizeCallback(g_mainWindow, CalcViewport);
-	CalcViewport(g_mainWindow, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+	glfwSetCursorPosCallback(window, cursorPosCallback);
+	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-	InitShaders();
-	CreateObject();
+	// ImGui initialisation.
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true); // Attach ImGui to GLFW3.
+	ImGui_ImplOpenGL3_Init("#version 460"); // Configure GLSL version to match OpenGL 4.6.
+
+	// ImGui configuration.
+	ImGui::StyleColorsDark(); // Set ImGui colours to dark mode.
+	ImGuiIO& io = ImGui::GetIO(); (void)io; // Struct to access various ImGui features and configuration.
+	io.IniFilename = nullptr; // Disable saving ImGui state, unneeded in this implementation.
+
+	// Initialize OpenGL shader program and pass it into the struct.
+	unsigned int shaderProgram = InitShaders();
+
+	auto entity = Entity(Model(
+		{
+			Vertex(glm::vec3(0.5f, 0.5f, 0.5f), RandomColor()),
+			Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), RandomColor()),
+			Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), RandomColor()),
+			Vertex(glm::vec3(0.5f, -0.5f, -0.5f), RandomColor()),
+			Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), RandomColor()),
+			Vertex(glm::vec3(0.5f, 0.5f, -0.5f), RandomColor()),
+			Vertex(glm::vec3(0.5f, -0.5f, 0.5f), RandomColor()),
+			Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), RandomColor())
+		},
+		{
+			0, 1, 2,
+			1, 3, 4,
+			5, 6, 3,
+			7, 3, 6,
+			2, 4, 7,
+			0, 7, 6,
+			0, 5, 1,
+			1, 5, 3,
+			5, 0, 6,
+			7, 4, 3,
+			2, 1, 4,
+			0, 2, 7
+		}
+	), shaderProgram);
+
+	entity.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+
+	// This is never cleared up because the kernel will do that when the program closes.
+	// It can be optionally cleaned up in the function init is called.
+	auto* display = new DisplayData(
+		entity,
+		MenuConfig(),
+		shaderProgram
+	);
+
+	// Call this during init as the resize callback is not called on startup.
+	display->CalcViewport(window, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+
+	// Make this object accessible from within any GLFW callback.
+	glfwSetWindowUserPointer(window, display);
+
+	return display;
 }
 
-void DisplayDraw() {
+void DrawImGui(DisplayData* display, GLFWwindow* window) {
+	// Prepare ImGui at the start of a new frame.
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	// Menu bar
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Import")) {}
+			if (ImGui::MenuItem("Export")) {}
+			if (ImGui::MenuItem("Quit", "Alt+F4")) {
+				glfwSetWindowShouldClose(window, GL_TRUE);
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("View")) {
+			ImGui::MenuItem("Show Source", nullptr, &display->config.drawSource);
+			ImGui::MenuItem("Show Preview", nullptr, &display->config.drawPreview);
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Help")) {
+			if (ImGui::MenuItem("About")) {
+				display->config.aboutOpened = true;
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	// Gather the window height.
+	int height; glfwGetWindowSize(window, nullptr, &height);
+
+	// Push the sidepanel down to make room for the menu bar.
+	ImGui::SetNextWindowPos(ImVec2(0, GUI_MENUBAR_HEIGHT));
+	ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, static_cast<float>(height) - GUI_MENUBAR_HEIGHT));
+
+	ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+	// A test demonstration of ImGui features.
+	ImGui::Checkbox("Example Checkbox", &display->config.exampleCheckbox);
+	ImGui::End();
+
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(center);
+
+	if (display->config.aboutOpened) {
+		ImGui::Begin("About", &display->config.aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+		ImGui::Text("Version: 1.0");
+		ImGui::End();
+	}
+
+	// Trigger an ImGui render.
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void DisplayDraw(DisplayData* display, GLFWwindow* window) {
 	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
 
-	if (g_config.drawPreview) {
-		RenderObject();
+	if (display->config.drawPreview) {
+		// This section of the MVP will be used by all objects, if there are multiple.
+		glm::mat4 mvp(1.0f);
+
+		CreateProjMatrix(mvp, 90.0f, 1.0f, 10.0f, display->GetAspectRatio());
+
+		CreateViewMatrix(mvp,
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		display->entity.Draw(mvp);
 	}
+
+	DrawImGui(display ,window);
 }

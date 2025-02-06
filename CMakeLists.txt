@@ -29,8 +29,16 @@ set(SHARED_SOURCE_FILES src/main.cpp
 		src/display.cpp
 		src/display.h
 		src/constants.h
-		src/menu.cpp
-		src/menu.h)
+		src/classes/entity.cpp
+		src/classes/entity.h
+		src/classes/vertex.h
+		src/classes/model.h
+		src/matrix_math.cpp
+		src/matrix_math.h
+		src/classes/menu_config.h
+		src/classes/display_data.h
+		src/classes/display_data.cpp
+)
 
 if (WIN32)
 	# Create the executable, with additional files for Windows.
