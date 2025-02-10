@@ -63,7 +63,7 @@ void Entity::SetPosition(const glm::vec3& position) {
 
 void Entity::SetRotation(const glm::vec3& rotation) {
 	// Disallow setting rotations higher than 360 degrees.
-	assert(rotation.x > 360.0f || rotation.y > 360.0f || rotation.z > 360.0f);
+	assert(rotation.x < 360.0f || rotation.y < 360.0f || rotation.z < 360.0f);
 
 	m_rotation = rotation;
 }
