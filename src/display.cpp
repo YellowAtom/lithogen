@@ -223,17 +223,12 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 		shaderProgram
 	);
 
-	auto camera = Camera();
-
-	glm::vec3 entityPos(0.0f, 0.0f, 2.0f);
-
-	camera.SetTargetPos(entityPos);
-	entity.SetPosition(entityPos);
+	entity.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
 
 	// This is never cleared up because the kernel will do that when the program closes.
 	// It can be optionally cleaned up in the function init is called.
 	auto* display = new DisplayData(
-		camera,
+		Camera(),
 		entity,
 		MenuConfig(),
 		shaderProgram
@@ -320,5 +315,5 @@ void DisplayDraw(DisplayData* display, GLFWwindow* window) {
 		display->entity.Draw(mvp);
 	}
 
-	DrawImGui(display ,window);
+	DrawImGui(display, window);
 }
