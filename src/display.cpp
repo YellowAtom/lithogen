@@ -166,7 +166,7 @@ glm::vec3 RandomColor() {
 }
 
 DisplayData* DisplayInit(GLFWwindow* window) {
-	// Vertex optimisation, don't draw the back side of a triangle.
+	// Don't draw the backside of a triangle.
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glCullFace(GL_BACK);
@@ -271,7 +271,8 @@ void DisplayDraw(GLFWwindow* window, DisplayData* display, MenuConfig* config) {
 			ImGui::Separator();
 			ImGui::MenuItem("Show Preview", nullptr, &config->drawPreview);
 			if (ImGui::MenuItem("Wireframe Preview", nullptr, &config->drawWireframe)) {
-				glPolygonMode(GL_FRONT_AND_BACK, config->drawWireframe ? GL_LINE : GL_FILL);
+				if (config->drawWireframe) glDisable(GL_CULL_FACE); else glEnable(GL_CULL_FACE); // Render back side of wireframe faces.
+				glPolygonMode(GL_FRONT_AND_BACK, config->drawWireframe ? GL_LINE : GL_FILL); // Toggle line rendering.
 			}
 			if (ImGui::MenuItem("Reset Preview", "R")) {
 				display->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset object rotation.
