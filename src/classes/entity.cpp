@@ -7,10 +7,6 @@
 #include <iostream>
 
 Entity::Entity(const Model& model, unsigned int shaderProgram) {
-	m_position = glm::vec3(0.0f, 0.0f, 0.0f);
-	m_rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
-
 	m_mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
 
 	glGenVertexArrays(1, &m_vao);

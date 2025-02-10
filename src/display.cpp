@@ -21,17 +21,27 @@
 
 // GLFW callback functions.
 
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+	// Recalculate viewport size when the window is resized.
+	display->CalcViewport(window, width, height);
+}
+
 void cursorPosCallback(GLFWwindow* window, double x, double y) {
 	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
 
 	// TODO: Rotating the cube too much will make this inaccurate, find a way.
 
 	// Store previous mouse location to calculate difference.
-	// Static allows variable to persist through multiple function calls.
+	// Static allows a variable to persist through multiple function calls.
 	static double previousX = 0;
 	static double previousY = 0;
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == true) {
+	int width, height = 0;
+	glfwGetWindowSize(window, &width, &height);
+
+	// Is left mouse down and is the cursor within the viewport.
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == true && width - x < display->GetViewportWidth() && height - y < display->GetViewportHeight()) {
 		// Apply the difference between the previous and current mouse location to the entity's rotation.
 		display->entity.AddRotation(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
@@ -40,10 +50,10 @@ void cursorPosCallback(GLFWwindow* window, double x, double y) {
 	previousY = y;
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-	// Recalculate viewport size when the window is resized.
+void scrollCallback(GLFWwindow* window, double x, double y) {
 	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
-	display->CalcViewport(window, width, height);
+
+	display->camera.Move(glm::vec3(0, 0, y / 10));
 }
 
 // Shader initialization functions.
@@ -157,8 +167,9 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 	// Set OpenGL clear render colour, the colour drawn if nothing else is.
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 
-	glfwSetCursorPosCallback(window, cursorPosCallback);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+	glfwSetCursorPosCallback(window, cursorPosCallback);
+	glfwSetScrollCallback(window, scrollCallback);
 
 	// ImGui initialisation.
 	ImGui::CreateContext();
@@ -173,38 +184,47 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 	// Initialize OpenGL shader program and pass it into the struct.
 	unsigned int shaderProgram = InitShaders();
 
-	auto entity = Entity(Model(
-		{
-			Vertex(glm::vec3(0.5f, 0.5f, 0.5f), RandomColor()),
-			Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), RandomColor()),
-			Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), RandomColor()),
-			Vertex(glm::vec3(0.5f, -0.5f, -0.5f), RandomColor()),
-			Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), RandomColor()),
-			Vertex(glm::vec3(0.5f, 0.5f, -0.5f), RandomColor()),
-			Vertex(glm::vec3(0.5f, -0.5f, 0.5f), RandomColor()),
-			Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), RandomColor())
-		},
-		{
-			0, 1, 2,
-			1, 3, 4,
-			5, 6, 3,
-			7, 3, 6,
-			2, 4, 7,
-			0, 7, 6,
-			0, 5, 1,
-			1, 5, 3,
-			5, 0, 6,
-			7, 4, 3,
-			2, 1, 4,
-			0, 2, 7
-		}
-	), shaderProgram);
+	auto entity = Entity(
+		Model(
+			{
+				Vertex(glm::vec3(0.5f, 0.5f, 0.5f), RandomColor()),
+				Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), RandomColor()),
+				Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), RandomColor()),
+				Vertex(glm::vec3(0.5f, -0.5f, -0.5f), RandomColor()),
+				Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), RandomColor()),
+				Vertex(glm::vec3(0.5f, 0.5f, -0.5f), RandomColor()),
+				Vertex(glm::vec3(0.5f, -0.5f, 0.5f), RandomColor()),
+				Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), RandomColor())
+			},
+			{
+				0, 1, 2,
+				1, 3, 4,
+				5, 6, 3,
+				7, 3, 6,
+				2, 4, 7,
+				0, 7, 6,
+				0, 5, 1,
+				1, 5, 3,
+				5, 0, 6,
+				7, 4, 3,
+				2, 1, 4,
+				0, 2, 7
+			}
+		),
+		shaderProgram
+	);
 
-	entity.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+	auto camera = Camera();
+
+	glm::vec3 entityPos(0.0f, 0.0f, 2.0f);
+
+	camera.SetTargetPos(entityPos);
+	entity.SetPosition(entityPos);
 
 	// This is never cleared up because the kernel will do that when the program closes.
 	// It can be optionally cleaned up in the function init is called.
 	auto* display = new DisplayData(
+		camera,
 		entity,
 		MenuConfig(),
 		shaderProgram
@@ -282,13 +302,9 @@ void DisplayDraw(DisplayData* display, GLFWwindow* window) {
 		// This section of the MVP will be used by all objects, if there are multiple.
 		glm::mat4 mvp(1.0f);
 
-		CreateProjMatrix(mvp, 90.0f, 1.0f, 10.0f, display->GetAspectRatio());
+		CreateProjMatrix(mvp, 90.0f, 0.1f, 10.0f, display->GetAspectRatio());
 
-		CreateViewMatrix(mvp,
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
+		display->camera.ApplyViewMatrix(mvp);
 
 		display->entity.Draw(mvp);
 	}

@@ -1,4 +1,5 @@
 
+#include <glad/gl.h>
 #include "display_data.h"
 #include "../constants.h"
 

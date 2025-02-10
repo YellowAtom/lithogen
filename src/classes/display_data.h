@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glad/gl.h>
 #include "glfw/glfw3.h"
+#include "camera.h"
 #include "entity.h"
 #include "menu_config.h"
 
 class DisplayData {
 public:
-	DisplayData(Entity entity, MenuConfig config, unsigned int shaderProgram) : entity(entity), config(config), shaderProgram(shaderProgram) {}
+	DisplayData(Camera camera, Entity entity, MenuConfig config, unsigned int shaderProgram) : camera(camera), entity(entity), config(config), shaderProgram(shaderProgram) {}
 
 	void CalcViewport(GLFWwindow* window, int width, int height);
 
@@ -15,6 +15,7 @@ public:
 	[[nodiscard]] int GetViewportHeight() const;
 	[[nodiscard]] float GetAspectRatio() const;
 
+	Camera camera;
 	Entity entity;
 	MenuConfig config;
 	unsigned int shaderProgram;

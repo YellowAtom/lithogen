@@ -38,6 +38,8 @@ set(SHARED_SOURCE_FILES src/main.cpp
 		src/classes/menu_config.h
 		src/classes/display_data.h
 		src/classes/display_data.cpp
+		src/classes/camera.cpp
+		src/classes/camera.h
 )
 
 if (WIN32)
