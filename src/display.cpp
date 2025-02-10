@@ -12,7 +12,6 @@
 #include <glm/ext.hpp>
 
 #include "constants.h"
-#include "matrix_math.h"
 #include "classes/display_data.h"
 #include "classes/menu_config.h"
 #include "classes/entity.h"
@@ -35,7 +34,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
-void CursorPosCallback(GLFWwindow* window, double x, double y) {
+void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
 
 	// TODO: Rotating the cube too much will make this inaccurate, find a way.
@@ -49,9 +48,9 @@ void CursorPosCallback(GLFWwindow* window, double x, double y) {
 	glfwGetWindowSize(window, &width, &height);
 
 	// Is left mouse down and is the cursor within the viewport.
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == true && width - x < display->GetViewportWidth() && height - y < display->GetViewportHeight()) {
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && width - x < display->GetViewportWidth() && height - y < display->GetViewportHeight()) {
 		// Apply the difference between the previous and current mouse location to the entity's rotation.
-		display->entity.AddRotation(glm::vec3(-(y - previousY), x - previousX, 0));
+		display->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
 
 	previousX = x;

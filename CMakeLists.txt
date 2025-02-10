@@ -33,8 +33,6 @@ set(SHARED_SOURCE_FILES src/main.cpp
 		src/classes/entity.h
 		src/classes/vertex.h
 		src/classes/model.h
-		src/matrix_math.cpp
-		src/matrix_math.h
 		src/classes/menu_config.h
 		src/classes/display_data.h
 		src/classes/display_data.cpp

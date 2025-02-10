@@ -10,7 +10,7 @@ public:
 
 	void SetPosition(const glm::vec3& position);
 	void SetRotation(const glm::vec3& rotation);
-	void AddRotation(const glm::vec3& rotation);
+	void Rotate(const glm::vec3& rotation);
 	void SetScale(const glm::vec3& scale);
 private:
 	glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);

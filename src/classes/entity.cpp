@@ -1,10 +1,8 @@
 
+#include <algorithm>
 #include <glad/gl.h>
 #include "vertex.h"
-#include "../matrix_math.h"
 #include "entity.h"
-
-#include <iostream>
 
 Entity::Entity(const Model& model, unsigned int shaderProgram) {
 	m_mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
@@ -42,7 +40,50 @@ Entity::Entity(const Model& model, unsigned int shaderProgram) {
 }
 
 void Entity::Draw(glm::mat4 mvp) const {
-	CreateModelMatrix(mvp, m_position, m_rotation, m_scale);
+	// Apply scale to the matrix.
+	const glm::mat4 s(
+		m_scale.x, 0.0f, 0.0f, 0.0f,
+		0.0f, m_scale.y, 0.0f, 0.0f,
+		0.0f, 0.0f, m_scale.z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	// Apply translation / position to the matrix.
+	const glm::mat4 t(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		m_position.x, m_position.y, m_position.z, 1.0f
+	);
+
+	// Apply rotation to the matrix.
+	const float rotateX = glm::radians(m_rotation.x);
+	const float rotateY = glm::radians(m_rotation.y);
+	const float rotateZ = glm::radians(m_rotation.z);
+
+	const glm::mat4 rx(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, cosf(rotateX), sinf(rotateX), 0.0f,
+		0.0f, -sinf(rotateX), cosf(rotateX), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	const glm::mat4 ry(
+		cosf(rotateY), 0.0f, sinf(rotateY), 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		-sinf(rotateY), 0.0f, cosf(rotateY), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	const glm::mat4 rz(
+		cosf(rotateZ), 0.0f, sinf(rotateZ), 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		-sinf(rotateZ), 0.0f, cosf(rotateZ), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	// Combine the matrices into the world matrix in the correct order.
+	mvp *= t * (rz * ry * rx) * s;
 
 	// Pass the completed matrix to the GPU to be applied in the shader to the vector position.
 	glUniformMatrix4fv(m_mvpLoc, 1, GL_FALSE, &mvp[0][0]);
@@ -68,7 +109,7 @@ void Entity::SetRotation(const glm::vec3& rotation) {
 	m_rotation = rotation;
 }
 
-void Entity::AddRotation(const glm::vec3& rotation) {
+void Entity::Rotate(const glm::vec3& rotation) {
 	m_rotation += rotation;
 
 	// Ensure rotation does not go over 360 degrees to avoid precision loss.
