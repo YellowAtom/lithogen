@@ -21,13 +21,21 @@
 
 // GLFW callback functions.
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
 	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
 	// Recalculate viewport size when the window is resized.
 	display->CalcViewport(window, width, height);
 }
 
-void cursorPosCallback(GLFWwindow* window, double x, double y) {
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+
+	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+		display->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset rotation.
+	}
+}
+
+void CursorPosCallback(GLFWwindow* window, double x, double y) {
 	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
 
 	// TODO: Rotating the cube too much will make this inaccurate, find a way.
@@ -50,7 +58,7 @@ void cursorPosCallback(GLFWwindow* window, double x, double y) {
 	previousY = y;
 }
 
-void scrollCallback(GLFWwindow* window, double x, double y) {
+void ScrollCallback(GLFWwindow* window, double x, double y) {
 	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
 
 	display->camera.Move(glm::vec3(0, 0, y / 10));
@@ -167,9 +175,10 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 	// Set OpenGL clear render colour, the colour drawn if nothing else is.
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-	glfwSetCursorPosCallback(window, cursorPosCallback);
-	glfwSetScrollCallback(window, scrollCallback);
+	glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+	glfwSetKeyCallback(window, KeyCallback);
+	glfwSetCursorPosCallback(window, CursorPosCallback);
+	glfwSetScrollCallback(window, ScrollCallback);
 
 	// ImGui initialisation.
 	ImGui::CreateContext();
@@ -258,6 +267,10 @@ void DrawImGui(DisplayData* display, GLFWwindow* window) {
 		if (ImGui::BeginMenu("View")) {
 			ImGui::MenuItem("Show Source", nullptr, &display->config.drawSource);
 			ImGui::MenuItem("Show Preview", nullptr, &display->config.drawPreview);
+			ImGui::Separator();
+			if (ImGui::MenuItem("Reset Preview", "R")) {
+				display->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset object rotation.
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Help")) {
