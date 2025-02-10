@@ -6,6 +6,7 @@
 #include "display.h"
 #include "constants.h"
 #include "classes/entity.h"
+#include "classes/menu_config.h"
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -60,10 +61,11 @@ int main(int argc, char* argv[]) {
 	if (gladLoadGL(glfwGetProcAddress) == 0)
 		return 1;
 
+	auto* config = new MenuConfig();
 	DisplayData* display = DisplayInit(mainWindow);
 
 	while (!glfwWindowShouldClose(mainWindow)) {
-		DisplayDraw(display, mainWindow);
+		DisplayDraw(mainWindow, display, config);
 
 		glfwSwapBuffers(mainWindow); // Push the prepared frame buffer to the screen.
 		glfwPollEvents(); // Process the OS's window events, in other words, gathering inputs and window state from the OS.

@@ -229,7 +229,6 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 	auto* display = new DisplayData(
 		Camera(),
 		entity,
-		MenuConfig(),
 		shaderProgram
 	);
 
@@ -242,7 +241,17 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 	return display;
 }
 
-void DrawImGui(DisplayData* display, GLFWwindow* window) {
+void DisplayDraw(GLFWwindow* window, DisplayData* display, MenuConfig* config) {
+	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
+
+	if (config->drawPreview) {
+		// This section of the MVP will be used by all objects, if there are multiple.
+		glm::mat4 mvp(1.0f);
+
+		display->camera.ApplyMatrix(mvp, display->GetAspectRatio());
+		display->entity.Draw(mvp);
+	}
+
 	// Prepare ImGui at the start of a new frame.
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -259,8 +268,8 @@ void DrawImGui(DisplayData* display, GLFWwindow* window) {
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("View")) {
-			ImGui::MenuItem("Show Source", nullptr, &display->config.drawSource);
-			ImGui::MenuItem("Show Preview", nullptr, &display->config.drawPreview);
+			ImGui::MenuItem("Show Source", nullptr, &config->drawSource);
+			ImGui::MenuItem("Show Preview", nullptr, &config->drawPreview);
 			ImGui::Separator();
 			if (ImGui::MenuItem("Reset Preview", "R")) {
 				display->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset object rotation.
@@ -269,7 +278,7 @@ void DrawImGui(DisplayData* display, GLFWwindow* window) {
 		}
 		if (ImGui::BeginMenu("Help")) {
 			if (ImGui::MenuItem("About")) {
-				display->config.aboutOpened = true;
+				config->aboutOpened = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -285,14 +294,14 @@ void DrawImGui(DisplayData* display, GLFWwindow* window) {
 
 	ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 	// A test demonstration of ImGui features.
-	ImGui::Checkbox("Example Checkbox", &display->config.exampleCheckbox);
+	ImGui::Checkbox("Example Checkbox", &config->exampleCheckbox);
 	ImGui::End();
 
 	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 	ImGui::SetNextWindowPos(center);
 
-	if (display->config.aboutOpened) {
-		ImGui::Begin("About", &display->config.aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+	if (config->aboutOpened) {
+		ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 		ImGui::Text("Version: 1.0");
 		ImGui::End();
 	}
@@ -300,19 +309,4 @@ void DrawImGui(DisplayData* display, GLFWwindow* window) {
 	// Trigger an ImGui render.
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void DisplayDraw(DisplayData* display, GLFWwindow* window) {
-	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
-
-	if (display->config.drawPreview) {
-		// This section of the MVP will be used by all objects, if there are multiple.
-		glm::mat4 mvp(1.0f);
-
-		display->camera.ApplyMatrix(mvp, display->GetAspectRatio());
-
-		display->entity.Draw(mvp);
-	}
-
-	DrawImGui(display, window);
 }
