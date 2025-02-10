@@ -315,9 +315,7 @@ void DisplayDraw(DisplayData* display, GLFWwindow* window) {
 		// This section of the MVP will be used by all objects, if there are multiple.
 		glm::mat4 mvp(1.0f);
 
-		CreateProjMatrix(mvp, 90.0f, 0.1f, 10.0f, display->GetAspectRatio());
-
-		display->camera.ApplyViewMatrix(mvp);
+		display->camera.ApplyMatrix(mvp, display->GetAspectRatio());
 
 		display->entity.Draw(mvp);
 	}

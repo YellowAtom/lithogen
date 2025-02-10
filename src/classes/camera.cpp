@@ -2,7 +2,14 @@
 #include "camera.h"
 #include "../matrix_math.h"
 
-void Camera::ApplyViewMatrix(glm::mat4& mvp) const {
+void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {
+	CreateProjMatrix(mvp,
+		m_fov,
+		m_nearZ,
+		m_farZ,
+		aspectRatio
+	);
+
 	CreateViewMatrix(mvp,
 		m_position,
 		m_target,
@@ -24,4 +31,16 @@ void Camera::SetTargetPos(const glm::vec3& target) {
 
 void Camera::SetUpDirection(const glm::vec3& up) {
 	m_up = up;
+}
+
+void Camera::SetFov(float fov) {
+	m_fov = fov;
+}
+
+void Camera::SetNearZ(float nearZ) {
+	m_nearZ = nearZ;
+}
+
+void Camera::SetFarZ(float farZ) {
+	m_farZ = farZ;
 }
