@@ -225,7 +225,6 @@ DisplayData* DisplayInit(GLFWwindow* window) {
 	entity.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
 
 	// This is never cleared up because the kernel will do that when the program closes.
-	// It can be optionally cleaned up in the function init is called.
 	auto* display = new DisplayData(
 		Camera(),
 		entity,
@@ -269,8 +268,11 @@ void DisplayDraw(GLFWwindow* window, DisplayData* display, MenuConfig* config) {
 		}
 		if (ImGui::BeginMenu("View")) {
 			ImGui::MenuItem("Show Source", nullptr, &config->drawSource);
-			ImGui::MenuItem("Show Preview", nullptr, &config->drawPreview);
 			ImGui::Separator();
+			ImGui::MenuItem("Show Preview", nullptr, &config->drawPreview);
+			if (ImGui::MenuItem("Wireframe Preview", nullptr, &config->drawWireframe)) {
+				glPolygonMode(GL_FRONT_AND_BACK, config->drawWireframe ? GL_LINE : GL_FILL);
+			}
 			if (ImGui::MenuItem("Reset Preview", "R")) {
 				display->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset object rotation.
 			}
