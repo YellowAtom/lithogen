@@ -1,7 +1,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -10,6 +9,7 @@
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <battery/embed.hpp>
 
 #include "constants.h"
 #include "classes/display_data.h"
@@ -65,22 +65,7 @@ void ScrollCallback(GLFWwindow* window, double x, double y) {
 
 // Shader initialization functions.
 
-unsigned int LoadShader(const char* pFilePath, const int shaderType) {
-	std::ifstream shaderFile(pFilePath);
-
-	if (!shaderFile.is_open()) {
-		std::cout << "Error opening shader file \"" << pFilePath << "\"" << std::endl;
-		exit(1);
-	}
-
-	std::string shaderStr, line;
-
-	while (getline(shaderFile, line)) {
-		shaderStr.append(line);
-		shaderStr.append("\n");
-	}
-
-	const char* shaderSrc = shaderStr.data();
+unsigned int LoadShader(const char* pFileContent, const int shaderType) {
 	unsigned int shader = glCreateShader(shaderType);
 
 	if (shader == 0) {
@@ -89,10 +74,10 @@ unsigned int LoadShader(const char* pFilePath, const int shaderType) {
 	}
 
 	const char* shaders[1];
-	shaders[0] = shaderSrc;
+	shaders[0] = pFileContent;
 
 	int lengths[1];
-	lengths[0] = strlen(shaderSrc);
+	lengths[0] = strlen(pFileContent);
 
 	int success;
 
@@ -103,7 +88,7 @@ unsigned int LoadShader(const char* pFilePath, const int shaderType) {
 	if (!success) {
 		char infoLog[512];
 		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cout << "Failed to compile shader \"" << pFilePath << "\": \n" << infoLog << std::endl;
+		std::cout << "Failed to compile shader type \"" << shaderType << "\": \n" << infoLog << std::endl;
 		exit(1);
 	}
 
@@ -118,8 +103,8 @@ unsigned int InitShaders() {
 		exit(1);
 	}
 
-	unsigned int vertShader = LoadShader("./shaders/vertex.glsl", GL_VERTEX_SHADER);
-	unsigned int fragShader = LoadShader("./shaders/fragment.glsl", GL_FRAGMENT_SHADER);
+	const unsigned int vertShader = LoadShader(b::embed<"res/shaders/vertex.glsl">().data(), GL_VERTEX_SHADER);
+	const unsigned int fragShader = LoadShader(b::embed<"res/shaders/fragment.glsl">().data(), GL_FRAGMENT_SHADER);
 
 	// Attach the finalised shaders to a shader program to be used by the rest of the program.
 	glAttachShader(shaderProgram, vertShader);
