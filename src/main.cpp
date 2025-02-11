@@ -5,8 +5,8 @@
 #include <glfw/glfw3.h>
 #include "display.h"
 #include "constants.h"
-#include "classes/entity.h"
-#include "classes/menu_config.h"
+#include "entity.h"
+#include "menu_config.h"
 
 #ifdef OS_WINDOWS
 #include <windows.h>

@@ -30,15 +30,15 @@ set(SHARED_SOURCE_FILES src/main.cpp
 		src/display.cpp
 		src/display.h
 		src/constants.h
-		src/classes/entity.cpp
-		src/classes/entity.h
-		src/classes/vertex.h
-		src/classes/model.h
-		src/classes/menu_config.h
-		src/classes/display_data.h
-		src/classes/display_data.cpp
-		src/classes/camera.cpp
-		src/classes/camera.h
+		src/entity.cpp
+		src/entity.h
+		src/vertex.h
+		src/model.h
+		src/menu_config.h
+		src/display_data.h
+		src/display_data.cpp
+		src/camera.cpp
+		src/camera.h
 )
 
 if (WIN32)

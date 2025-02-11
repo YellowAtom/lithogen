@@ -1,7 +1,7 @@
 
 #include <glad/gl.h>
 #include "display_data.h"
-#include "../constants.h"
+#include "constants.h"
 
 void DisplayData::CalcViewport(GLFWwindow* window, int width, int height) {
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.

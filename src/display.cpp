@@ -12,11 +12,11 @@
 #include <battery/embed.hpp>
 
 #include "constants.h"
-#include "classes/display_data.h"
-#include "classes/menu_config.h"
-#include "classes/entity.h"
-#include "classes/model.h"
-#include "classes/vertex.h"
+#include "display_data.h"
+#include "menu_config.h"
+#include "entity.h"
+#include "model.h"
+#include "vertex.h"
 
 // GLFW callback functions.
 
