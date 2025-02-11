@@ -10,7 +10,6 @@
 
 #ifdef OS_WINDOWS
 #include <windows.h>
-#include <dwmapi.h>
 #include "glfw/glfw3native.h"
 #endif
 
@@ -41,11 +40,6 @@ int main(int argc, char* argv[]) {
 		// Gather the windows native window handlers.
 		HWND hWindow = glfwGetWin32Window(mainWindow);
 		HINSTANCE hInstance = GetModuleHandle(nullptr);
-
-		// Force the window title bar to dark mode through the dwmapi.
-		// TODO: Figure out how to implement responsive dark mode while using GLFW3.
-		constexpr BOOL value = true;
-		DwmSetWindowAttribute(hWindow, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 
 		// Set the .ico from the resource file as the window icon.
 		HICON hIcon = LoadIcon(hInstance, "LithoGenIcon");

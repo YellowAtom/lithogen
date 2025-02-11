@@ -50,9 +50,6 @@ if (WIN32)
 	# OS_WINDOWS - For the codebase to ask if the program will be compiling to windows.
 	target_compile_definitions(App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN)
 
-	# Link the Windows Desktop Window Manager API to interface with the title bar.
-	target_link_libraries(App PRIVATE dwmapi)
-
 	# Set the application type to windowed and force the use of the default entry point main().
 	#target_link_options(App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
 else()
