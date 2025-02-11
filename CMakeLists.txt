@@ -13,6 +13,9 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+# Configuration for embed.
+set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
+
 # Global project precompiler definitions.
 add_compile_definitions(GLFW_EXPOSE_NATIVE_WIN32)
 
@@ -24,6 +27,7 @@ add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glad-2.0.8)
 add_subdirectory(deps/imgui-1.91.7)
 add_subdirectory(deps/glm-1.0.1)
+add_subdirectory(deps/embed-1.2.19)
 
 set(SHARED_SOURCE_FILES src/main.cpp
 		src/display.cpp
