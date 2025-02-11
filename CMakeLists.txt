@@ -22,7 +22,7 @@ add_compile_definitions(GLFW_EXPOSE_NATIVE_WIN32)
 # Include project dependencies.
 add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glad-2.0.8)
-add_subdirectory(deps/imgui-1.91.7)
+add_subdirectory(deps/imgui-1.91.8)
 add_subdirectory(deps/glm-1.0.1)
 add_subdirectory(deps/embed-1.2.19)
 
