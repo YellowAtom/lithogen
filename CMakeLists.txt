@@ -13,7 +13,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
-# Configuration for embed.
+# Configuration for battery embed.
 set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
 # Global project precompiler definitions.
@@ -27,22 +27,11 @@ add_subdirectory(deps/glm-1.0.1)
 add_subdirectory(deps/imgui-1.91.8)
 add_subdirectory(deps/stb_image-2.30)
 
-set(SHARED_SOURCE_FILES src/main.cpp
-		src/constants.h
-		src/entity.cpp
-		src/entity.h
-		src/vertex.h
-		src/model.h
-		src/config.h
-		src/preview.h
-		src/preview.cpp
-		src/camera.cpp
-		src/camera.h
-)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 if (WIN32)
 	# Create the executable, with additional files for Windows.
-	add_executable(App ${SHARED_SOURCE_FILES} res/resource.rc)
+	add_executable(App ${SOURCE_FILES} res/resource.rc)
 
 	# Windows specific compiler definitions:
 	# WIN32_LEAN_AND_MEAN - Active optional windows api optimisation features.
@@ -53,8 +42,10 @@ if (WIN32)
 	#target_link_options(App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
 else()
 	# Create the executable.
-	add_executable(App ${SHARED_SOURCE_FILES})
+	add_executable(App ${SOURCE_FILES})
 endif()
+
+target_include_directories(App PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Embed these files into the executable.
 b_embed(App res/shaders/vertex.glsl)
