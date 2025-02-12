@@ -6,7 +6,7 @@
 #include <glfw/glfw3.h>
 
 #include "constants.h"
-#include "preview.h"
+#include "render.h"
 #include "config.h"
 
 #ifdef OS_WINDOWS
@@ -52,6 +52,17 @@ int main(int argc, char* argv[]) {
 	// Load OpenGL for glad and avoid glad doing what GLFW3 has already done by attaching them.
 	if (gladLoadGL(glfwGetProcAddress) == 0)
 		return 1;
+
+	// Don't draw the backside of a triangle.
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
+	glCullFace(GL_BACK);
+
+	// Enable the depth buffer.
+	glEnable(GL_DEPTH_TEST);
+
+	// Set OpenGL clear render colour, the colour drawn if nothing else is.
+	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 
 	// Configure a randomness generator for the demo colours.
 	std::random_device rd;
@@ -112,10 +123,12 @@ int main(int argc, char* argv[]) {
 	);
 
 	auto* config = new Config();
-	Preview preview(mainWindow, config, cubeModel);
+	Render render(mainWindow, config, cubeModel);
 
 	while (!glfwWindowShouldClose(mainWindow)) {
-		preview.Draw();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color and depth buffer to avoid any junk.
+
+		render.Draw();
 
 		glfwSwapBuffers(mainWindow); // Push the prepared frame buffer to the screen.
 		glfwPollEvents(); // Process the OS's window events, in other words, gathering inputs and window state from the OS.

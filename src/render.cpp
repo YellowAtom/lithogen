@@ -10,28 +10,28 @@
 #include <glm/ext.hpp>
 #include <battery/embed.hpp>
 
+#include "render.h"
 #include "constants.h"
-#include "preview.h"
 #include "model.h"
 
 // GLFW callback functions.
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
+	auto* render = static_cast<Render*>(glfwGetWindowUserPointer(window));
 	// Recalculate viewport size when the window is resized.
-	preview->CalcViewport(width, height);
+	render->CalcViewport(width, height);
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
+	auto* render = static_cast<Render*>(glfwGetWindowUserPointer(window));
 
 	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-		preview->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset rotation.
+		render->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset rotation.
 	}
 }
 
 void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
-	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
+	auto* render = static_cast<Render*>(glfwGetWindowUserPointer(window));
 
 	// TODO: Rotating the cube too much will make this inaccurate, find a way.
 
@@ -44,9 +44,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	glfwGetWindowSize(window, &width, &height);
 
 	// Is left mouse down and is the cursor within the viewport.
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && width - x < preview->GetViewportWidth() && height - y < preview->GetViewportHeight()) {
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && width - x < render->GetViewportWidth() && height - y < render->GetViewportHeight()) {
 		// Apply the difference between the previous and current mouse location to the entity's rotation.
-		preview->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
+		render->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
 
 	previousX = x;
@@ -54,9 +54,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 }
 
 void ScrollCallback(GLFWwindow* window, double x, double y) {
-	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
+	auto* render = static_cast<Render*>(glfwGetWindowUserPointer(window));
 
-	preview->camera.Move(glm::vec3(0, 0, y / 10));
+	render->camera.Move(glm::vec3(0, 0, y / 10));
 }
 
 // Shader initialization functions.
@@ -137,19 +137,11 @@ unsigned int InitShaders() {
 	return shaderProgram;
 }
 
-Preview::Preview(GLFWwindow* window, Config* config, const Model& model)
+Render::Render(GLFWwindow* window, Config* config, const Model& model)
 	: entity(model, InitShaders()), m_window(window), m_config(config)
 {
 	// Ensure our OpenGL configurations will affect the correct context.
 	glfwMakeContextCurrent(window);
-
-	// Don't draw the backside of a triangle.
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
-	glCullFace(GL_BACK);
-
-	// Set OpenGL clear render colour, the colour drawn if nothing else is.
-	glClearColor(0.15f, 0.15f, 0.15f, 1.0f); // Dark Gray to be more distinct than black.
 
 	glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 	glfwSetKeyCallback(window, KeyCallback);
@@ -177,9 +169,7 @@ Preview::Preview(GLFWwindow* window, Config* config, const Model& model)
 	glfwSetWindowUserPointer(window, this);
 }
 
-void Preview::Draw() {
-	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
-
+void Render::Draw() {
 	if (m_config->drawPreview) {
 		// This section of the MVP will be used by all objects, if there are multiple.
 		glm::mat4 mvp(1.0f);
@@ -251,7 +241,7 @@ void Preview::Draw() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Preview::CalcViewport(int width, int height) {
+void Render::CalcViewport(int width, int height) {
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
 	// The render calculations need access to this data also.
 	m_viewportWidth = width - GUI_SIDEPANEL_WIDTH;
@@ -261,14 +251,14 @@ void Preview::CalcViewport(int width, int height) {
 	glViewport(GUI_SIDEPANEL_WIDTH, 0, m_viewportWidth, m_viewportHeight);
 }
 
-int Preview::GetViewportWidth() const {
+int Render::GetViewportWidth() const {
 	return m_viewportWidth;
 }
 
-int Preview::GetViewportHeight() const {
+int Render::GetViewportHeight() const {
 	return m_viewportHeight;
 }
 
-float Preview::GetAspectRatio() const {
+float Render::GetAspectRatio() const {
 	return m_aspectRatio;
 }

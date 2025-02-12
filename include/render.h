@@ -5,9 +5,9 @@
 #include "entity.h"
 #include "config.h"
 
-class Preview {
+class Render {
 public:
-	explicit Preview(GLFWwindow* window, Config* config, const Model& model);
+	explicit Render(GLFWwindow* window, Config* config, const Model& model);
 	void Draw();
 
 	void CalcViewport(int width, int height);
