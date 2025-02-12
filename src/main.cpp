@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 	if (gladLoadGL(glfwGetProcAddress) == 0)
 		return 1;
 
-	// Seed any calls to rand() in the application with the process id, will be different every time.
+	// Configure a randomness generator for the demo colours.
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_real_distribution<float> dist(0.0f, 1.0f);
