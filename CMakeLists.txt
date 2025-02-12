@@ -28,8 +28,6 @@ add_subdirectory(deps/imgui-1.91.8)
 add_subdirectory(deps/stb_image-2.30)
 
 set(SHARED_SOURCE_FILES src/main.cpp
-		src/display.cpp
-		src/display.h
 		src/constants.h
 		src/entity.cpp
 		src/entity.h

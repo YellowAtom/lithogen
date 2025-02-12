@@ -3,12 +3,14 @@
 #include "glfw/glfw3.h"
 #include "camera.h"
 #include "entity.h"
+#include "menu_config.h"
 
 class DisplayData {
 public:
-	DisplayData(Camera camera, Entity entity, unsigned int shaderProgram) : camera(camera), entity(entity), shaderProgram(shaderProgram) {}
+	explicit DisplayData(GLFWwindow* window, MenuConfig* config, const Model& model);
+	void Draw();
 
-	void CalcViewport(GLFWwindow* window, int width, int height);
+	void CalcViewport(int width, int height);
 
 	[[nodiscard]] int GetViewportWidth() const;
 	[[nodiscard]] int GetViewportHeight() const;
@@ -16,8 +18,12 @@ public:
 
 	Camera camera;
 	Entity entity;
-	unsigned int shaderProgram;
 private:
+	GLFWwindow* m_window;
+	MenuConfig* m_config;
+
+	unsigned int m_shaderProgram = 0;
+
 	int m_viewportWidth = 0;
 	int m_viewportHeight = 0;
 	float m_aspectRatio = 0.0f;
