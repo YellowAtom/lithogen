@@ -20,11 +20,12 @@ set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 add_compile_definitions(GLFW_EXPOSE_NATIVE_WIN32)
 
 # Include project dependencies.
-add_subdirectory(deps/glfw-3.4)
+add_subdirectory(deps/battery-embed-1.2.19)
 add_subdirectory(deps/glad-2.0.8)
-add_subdirectory(deps/imgui-1.91.8)
+add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glm-1.0.1)
-add_subdirectory(deps/embed-1.2.19)
+add_subdirectory(deps/imgui-1.91.8)
+add_subdirectory(deps/stb_image-2.30)
 
 set(SHARED_SOURCE_FILES src/main.cpp
 		src/display.cpp
@@ -65,4 +66,4 @@ b_embed(App res/shaders/fragment.glsl)
 set_target_properties(App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(App PRIVATE glfw glad imgui glm)
+target_link_libraries(App PRIVATE glad glfw glm imgui stb_image)
