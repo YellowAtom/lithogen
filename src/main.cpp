@@ -6,8 +6,8 @@
 #include <glfw/glfw3.h>
 
 #include "constants.h"
-#include "display_data.h"
-#include "menu_config.h"
+#include "preview.h"
+#include "config.h"
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -111,11 +111,11 @@ int main(int argc, char* argv[]) {
 		}
 	);
 
-	auto* config = new MenuConfig();
-	DisplayData display(mainWindow, config, cubeModel);
+	auto* config = new Config();
+	Preview preview(mainWindow, config, cubeModel);
 
 	while (!glfwWindowShouldClose(mainWindow)) {
-		display.Draw();
+		preview.Draw();
 
 		glfwSwapBuffers(mainWindow); // Push the prepared frame buffer to the screen.
 		glfwPollEvents(); // Process the OS's window events, in other words, gathering inputs and window state from the OS.

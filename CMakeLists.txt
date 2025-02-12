@@ -33,9 +33,9 @@ set(SHARED_SOURCE_FILES src/main.cpp
 		src/entity.h
 		src/vertex.h
 		src/model.h
-		src/menu_config.h
-		src/display_data.h
-		src/display_data.cpp
+		src/config.h
+		src/preview.h
+		src/preview.cpp
 		src/camera.cpp
 		src/camera.h
 )

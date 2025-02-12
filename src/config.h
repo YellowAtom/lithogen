@@ -1,6 +1,6 @@
 #pragma once
 
-struct MenuConfig {
+struct Config {
 	bool drawSource = true;
 	bool drawPreview = true;
 	bool drawWireframe = false;

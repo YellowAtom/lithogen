@@ -1,5 +1,4 @@
 
-#include <fstream>
 #include <iostream>
 
 #include <imgui.h>
@@ -11,31 +10,28 @@
 #include <glm/ext.hpp>
 #include <battery/embed.hpp>
 
-#include "display_data.h"
 #include "constants.h"
-#include "menu_config.h"
-#include "entity.h"
+#include "preview.h"
 #include "model.h"
-#include "vertex.h"
 
 // GLFW callback functions.
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
 	// Recalculate viewport size when the window is resized.
-	display->CalcViewport(width, height);
+	preview->CalcViewport(width, height);
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
 
 	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-		display->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset rotation.
+		preview->entity.SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset rotation.
 	}
 }
 
 void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
-	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
 
 	// TODO: Rotating the cube too much will make this inaccurate, find a way.
 
@@ -48,9 +44,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	glfwGetWindowSize(window, &width, &height);
 
 	// Is left mouse down and is the cursor within the viewport.
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && width - x < display->GetViewportWidth() && height - y < display->GetViewportHeight()) {
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && width - x < preview->GetViewportWidth() && height - y < preview->GetViewportHeight()) {
 		// Apply the difference between the previous and current mouse location to the entity's rotation.
-		display->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
+		preview->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
 
 	previousX = x;
@@ -58,9 +54,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 }
 
 void ScrollCallback(GLFWwindow* window, double x, double y) {
-	auto* display = static_cast<DisplayData*>(glfwGetWindowUserPointer(window));
+	auto* preview = static_cast<Preview*>(glfwGetWindowUserPointer(window));
 
-	display->camera.Move(glm::vec3(0, 0, y / 10));
+	preview->camera.Move(glm::vec3(0, 0, y / 10));
 }
 
 // Shader initialization functions.
@@ -141,7 +137,7 @@ unsigned int InitShaders() {
 	return shaderProgram;
 }
 
-DisplayData::DisplayData(GLFWwindow* window, MenuConfig* config, const Model& model)
+Preview::Preview(GLFWwindow* window, Config* config, const Model& model)
 	: entity(model, InitShaders()), m_window(window), m_config(config)
 {
 	// Ensure our OpenGL configurations will affect the correct context.
@@ -171,9 +167,6 @@ DisplayData::DisplayData(GLFWwindow* window, MenuConfig* config, const Model& mo
 	(void)io; // Struct to access various ImGui features and configuration.
 	io.IniFilename = nullptr; // Disable saving ImGui state, unneeded in this implementation.
 
-	// Initialize OpenGL shader program and pass it into the struct.
-	unsigned int shaderProgram = InitShaders();
-
 	// Move the starting position of the entity.
 	entity.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
 
@@ -184,7 +177,7 @@ DisplayData::DisplayData(GLFWwindow* window, MenuConfig* config, const Model& mo
 	glfwSetWindowUserPointer(window, this);
 }
 
-void DisplayData::Draw() {
+void Preview::Draw() {
 	glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer / frame to avoid any junk.
 
 	if (m_config->drawPreview) {
@@ -258,7 +251,7 @@ void DisplayData::Draw() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void DisplayData::CalcViewport(int width, int height) {
+void Preview::CalcViewport(int width, int height) {
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
 	// The render calculations need access to this data also.
 	m_viewportWidth = width - GUI_SIDEPANEL_WIDTH;
@@ -268,14 +261,14 @@ void DisplayData::CalcViewport(int width, int height) {
 	glViewport(GUI_SIDEPANEL_WIDTH, 0, m_viewportWidth, m_viewportHeight);
 }
 
-int DisplayData::GetViewportWidth() const {
+int Preview::GetViewportWidth() const {
 	return m_viewportWidth;
 }
 
-int DisplayData::GetViewportHeight() const {
+int Preview::GetViewportHeight() const {
 	return m_viewportHeight;
 }
 
-float DisplayData::GetAspectRatio() const {
+float Preview::GetAspectRatio() const {
 	return m_aspectRatio;
 }

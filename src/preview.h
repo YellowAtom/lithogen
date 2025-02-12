@@ -3,11 +3,11 @@
 #include "glfw/glfw3.h"
 #include "camera.h"
 #include "entity.h"
-#include "menu_config.h"
+#include "config.h"
 
-class DisplayData {
+class Preview {
 public:
-	explicit DisplayData(GLFWwindow* window, MenuConfig* config, const Model& model);
+	explicit Preview(GLFWwindow* window, Config* config, const Model& model);
 	void Draw();
 
 	void CalcViewport(int width, int height);
@@ -20,9 +20,7 @@ public:
 	Entity entity;
 private:
 	GLFWwindow* m_window;
-	MenuConfig* m_config;
-
-	unsigned int m_shaderProgram = 0;
+	Config* m_config;
 
 	int m_viewportWidth = 0;
 	int m_viewportHeight = 0;
