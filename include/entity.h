@@ -5,8 +5,12 @@
 
 class Entity {
 public:
-	explicit Entity(const Model& model, unsigned int shaderProgram);
+	Entity() = default;
+	Entity(const Model& model);
 	void Draw(glm::mat4 mvp) const;
+
+	void LoadModel(const Model& model);
+	bool HasModel() const;
 
 	void SetPosition(const glm::vec3& position);
 	void SetRotation(const glm::vec3& rotation);
@@ -19,5 +23,5 @@ private:
 	glm::vec3 m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	unsigned int m_vao = 0;
-	int m_mvpLoc;
+	int m_mvpLoc = 0;
 };

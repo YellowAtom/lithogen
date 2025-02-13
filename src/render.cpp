@@ -1,96 +1,14 @@
 
-#include <iostream>
-
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#include <battery/embed.hpp>
 
 #include "render.h"
 #include "constants.h"
-#include "model.h"
 
-// Shader initialization functions.
-
-unsigned int LoadShader(const char* pFileContent, const int shaderType) {
-	unsigned int shader = glCreateShader(shaderType);
-
-	if (shader == 0) {
-		std::cout << "Error creating shader type" << std::endl;
-		exit(1);
-	}
-
-	const char* shaders[1];
-	shaders[0] = pFileContent;
-
-	int lengths[1];
-	lengths[0] = strlen(pFileContent);
-
-	int success;
-
-	glShaderSource(shader, 1, shaders, lengths);
-	glCompileShader(shader);
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cout << "Failed to compile shader type \"" << shaderType << "\": \n" << infoLog << std::endl;
-		exit(1);
-	}
-
-	return shader;
-}
-
-unsigned int InitShaders() {
-	const unsigned int shaderProgram = glCreateProgram();
-
-	if (shaderProgram == 0) {
-		std::cout << "Error creating shader program" << std::endl;
-		exit(1);
-	}
-
-	const unsigned int vertShader = LoadShader(b::embed<"res/shaders/vertex.glsl">().data(), GL_VERTEX_SHADER);
-	const unsigned int fragShader = LoadShader(b::embed<"res/shaders/fragment.glsl">().data(), GL_FRAGMENT_SHADER);
-
-	// Attach the finalised shaders to a shader program to be used by the rest of the program.
-	glAttachShader(shaderProgram, vertShader);
-	glAttachShader(shaderProgram, fragShader);
-
-	int success;
-
-	glLinkProgram(shaderProgram);
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-	if (!success) {
-		char infoLog[512];
-		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-		std::cout << "Failed to link shader program: \n" << infoLog << std::endl;
-		exit(1);
-	}
-
-	glValidateProgram(shaderProgram);
-	glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
-
-	if (!success) {
-		char infoLog[512];
-		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-		std::cout << "Failed to validate shader program: \n" << infoLog << std::endl;
-		exit(1);
-	}
-
-	glUseProgram(shaderProgram);
-
-	// Clean up shaders now they are inside the shader program.
-	glDeleteShader(vertShader);
-	glDeleteShader(fragShader);
-
-	return shaderProgram;
-}
-
-Render::Render(GLFWwindow* window, Config* config, const Model& model)
-	: entity(model, InitShaders()), m_window(window), m_config(config)
+Render::Render(GLFWwindow* window, Config* config)
+	: m_window(window), m_config(config)
 {
 	// Ensure our OpenGL configurations will affect the correct context.
 	glfwMakeContextCurrent(window);
@@ -103,11 +21,10 @@ Render::Render(GLFWwindow* window, Config* config, const Model& model)
 }
 
 void Render::Draw() const {
-	if (m_config->drawPreview) {
-		// This section of the MVP will be used by all objects, if there are multiple.
+	// Only draw if desired and if a model has been compiled.
+	if (m_config->drawPreview && entity.HasModel()) {
 		glm::mat4 mvp(1.0f);
 		camera.ApplyMatrix(mvp, GetAspectRatio());
-
 		entity.Draw(mvp);
 	}
 }

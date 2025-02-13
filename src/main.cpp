@@ -1,5 +1,4 @@
 
-#include <random>
 #include <iostream>
 
 #include <imgui.h>
@@ -8,10 +7,12 @@
 #include <glad/gl.h>
 #include <glfw/glfw3.h>
 #include <nfd_glfw3.h>
+#include <stb_image.h>
 
 #include "constants.h"
 #include "render.h"
 #include "config.h"
+#include <compilation.h>
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -40,6 +41,21 @@ nfdu8char_t* FileSelectImage(GLFWwindow* window) {
 
 	NFD_Quit();
 	return result == NFD_CANCEL ? nullptr : outPath;
+}
+
+// A simple function to send the image data to the gpu and return the pointer.
+unsigned int LoadTexture(unsigned char* image, int width, int height) {
+	GLuint imageTexture;
+	glGenTextures(1, &imageTexture);
+	glBindTexture(GL_TEXTURE_2D, imageTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+	return imageTexture;
 }
 
 // GLFW callbacks.
@@ -164,71 +180,18 @@ int main(int argc, char* argv[]) {
 	(void)io; // Struct to access various ImGui features and configuration.
 	io.IniFilename = nullptr; // Disable saving ImGui state, unneeded in this implementation.
 
-	// Configure a randomness generator for the demo colours.
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-
-	// TODO: Make sure this gets cleaned up after its used.
-	// Temporary demo mesh, will be replaced with the lithophane generation pipeline.
-	Model cubeModel(
-		{
-			Vertex(
-				glm::vec3(0.5f, 0.5f, 0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(-0.5f, 0.5f, -0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(-0.5f, 0.5f, 0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(0.5f, -0.5f, -0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(-0.5f, -0.5f, -0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(0.5f, 0.5f, -0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(0.5f, -0.5f, 0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			),
-			Vertex(
-				glm::vec3(-0.5f, -0.5f, 0.5f),
-				glm::vec3(dist(mt), dist(mt), dist(mt))
-			)
-		},
-		{
-			0, 1, 2,
-			1, 3, 4,
-			5, 6, 3,
-			7, 3, 6,
-			2, 4, 7,
-			0, 7, 6,
-			0, 5, 1,
-			1, 5, 3,
-			5, 0, 6,
-			7, 4, 3,
-			2, 1, 4,
-			0, 2, 7
-		}
-	);
-
 	// It is better to let the kernel clean these up as the program will close faster.
 	auto* config = new Config();
-	auto* render = new Render(mainWindow, config, cubeModel);
+	auto* render = new Render(mainWindow, config);
 	auto* glfwUser = new glfwUserData(config, render);
 
 	// Make this object accessible from within any GLFW callback.
 	glfwSetWindowUserPointer(mainWindow, glfwUser);
+
+	// The currently mounted image.
+	unsigned char* image = nullptr;
+	int imageWidth, imageHeight;
+	unsigned int imageTexture = 0;
 
 	while (!glfwWindowShouldClose(mainWindow)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color and depth buffer to avoid any junk.
@@ -245,7 +208,11 @@ int main(int argc, char* argv[]) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Import")) {
 					if (nfdu8char_t* result = FileSelectImage(mainWindow)) {
-						std::cout << result << std::endl;
+						// Load the image from storage, it will automatically process any of the supported formats.
+						image = stbi_load(result, &imageWidth, &imageHeight, nullptr, 4);
+						// Send the image to the GPU for the renderer to preview.
+						imageTexture = LoadTexture(image, imageHeight, imageWidth);
+						// Clear the file path from memory as we are done with it.
 						NFD_FreePathU8(result);
 					}
 				}
@@ -286,6 +253,22 @@ int main(int argc, char* argv[]) {
 		ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 		// A test demonstration of ImGui features.
 		ImGui::Checkbox("Example Checkbox", &config->exampleCheckbox);
+
+		if (imageTexture != 0 ) {
+			// TODO: If the image is too big this fails to render it correctly. Need to resize for this display.
+			ImGui::Image(imageTexture, ImVec2(imageWidth, imageHeight));
+		}
+
+		if (ImGui::Button("Compile")) {
+			if (image) {
+				Model model;
+				CompileModel(model, config, image);
+				render->entity.LoadModel(model);
+			}
+
+			// TODO: Add visual error if compile fails or attempts without an image.
+		}
+
 		ImGui::End();
 
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();

@@ -7,7 +7,7 @@
 
 class Render {
 public:
-	explicit Render(GLFWwindow* window, Config* config, const Model& model);
+	explicit Render(GLFWwindow* window, Config* config);
 	void Draw() const;
 
 	void UpdateWireframe() const;
@@ -17,11 +17,11 @@ public:
 	[[nodiscard]] int GetViewportHeight() const;
 	[[nodiscard]] float GetAspectRatio() const;
 
-	Camera camera;
-	Entity entity;
+	Camera camera{};
+	Entity entity{};
 private:
-	GLFWwindow* m_window;
-	Config* m_config;
+	GLFWwindow* m_window = nullptr;
+	Config* m_config = nullptr;
 
 	int m_viewportWidth = 0;
 	int m_viewportHeight = 0;
