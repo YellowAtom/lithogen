@@ -25,6 +25,7 @@ add_subdirectory(deps/glad-2.0.8)
 add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glm-1.0.1)
 add_subdirectory(deps/imgui-1.91.8)
+add_subdirectory(deps/nativefiledialog-extended-1.2.1)
 add_subdirectory(deps/stb_image-2.30)
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
@@ -55,4 +56,4 @@ b_embed(App res/shaders/fragment.glsl)
 set_target_properties(App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(App PRIVATE glad glfw glm imgui stb_image)
+target_link_libraries(App PRIVATE glad glfw glm imgui nfd stb_image)

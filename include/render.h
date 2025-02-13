@@ -8,8 +8,9 @@
 class Render {
 public:
 	explicit Render(GLFWwindow* window, Config* config, const Model& model);
-	void Draw();
+	void Draw() const;
 
+	void UpdateWireframe() const;
 	void CalcViewport(int width, int height);
 
 	[[nodiscard]] int GetViewportWidth() const;

@@ -121,3 +121,7 @@ void Entity::Rotate(const glm::vec3& rotation) {
 void Entity::SetScale(const glm::vec3& scale) {
 	m_scale = scale;
 }
+
+void Entity::ResetRotation() {
+	SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset object rotation.
+}
