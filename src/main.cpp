@@ -259,8 +259,11 @@ int main(int argc, char* argv[]) {
 		ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, static_cast<float>(height) - GUI_MENUBAR_HEIGHT));
 
 		ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
-		// A test demonstration of ImGui features.
-		ImGui::Checkbox("Example Checkbox", &config->exampleCheckbox);
+
+		ImGui::Text("Grayscale Preference");
+		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0f, 1.0f);
+		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0f, 1.0f);
+		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0f, 1.0f);
 
 		if (image.texture != 0 ) {
 			// TODO: If the image is too big this fails to render it correctly. Need to resize for this display.
