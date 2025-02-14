@@ -12,7 +12,8 @@
 #include "constants.h"
 #include "render.h"
 #include "config.h"
-#include <compilation.h>
+#include "image.h"
+#include "compilation.h"
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -189,9 +190,7 @@ int main(int argc, char* argv[]) {
 	glfwSetWindowUserPointer(mainWindow, glfwUser);
 
 	// The currently mounted image.
-	unsigned char* image = nullptr;
-	int imageWidth, imageHeight;
-	unsigned int imageTexture = 0;
+	Image image;
 
 	while (!glfwWindowShouldClose(mainWindow)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color and depth buffer to avoid any junk.
@@ -209,11 +208,20 @@ int main(int argc, char* argv[]) {
 				if (ImGui::MenuItem("Import")) {
 					if (nfdu8char_t* result = FileSelectImage(mainWindow)) {
 						// Load the image from storage, it will automatically process any of the supported formats.
-						image = stbi_load(result, &imageWidth, &imageHeight, nullptr, 4);
-						// Send the image to the GPU for the renderer to preview.
-						imageTexture = LoadTexture(image, imageHeight, imageWidth);
-						// Clear the file path from memory as we are done with it.
-						NFD_FreePathU8(result);
+						image.data = stbi_load(result, &image.width, &image.height, nullptr, 4);
+
+						if (image.data == nullptr) {
+							std::cout << "Failed to load image!" << std::endl;
+						} else {
+							if (image.texture != 0) {
+								glDeleteTextures(1, &image.texture); // Ensure the previous image has been cleaned up.
+							}
+
+							// Send the image to the GPU for the renderer to preview.
+							image.texture = LoadTexture(image.data, image.width, image.height);
+							// Clear the file path from memory as we are done with it.
+							NFD_FreePathU8(result);
+						}
 					}
 				}
 				if (ImGui::MenuItem("Export")) {}
@@ -254,13 +262,13 @@ int main(int argc, char* argv[]) {
 		// A test demonstration of ImGui features.
 		ImGui::Checkbox("Example Checkbox", &config->exampleCheckbox);
 
-		if (imageTexture != 0 ) {
+		if (image.texture != 0 ) {
 			// TODO: If the image is too big this fails to render it correctly. Need to resize for this display.
-			ImGui::Image(imageTexture, ImVec2(imageWidth, imageHeight));
+			ImGui::Image(image.texture, ImVec2(image.width, image.height));
 		}
 
 		if (ImGui::Button("Compile")) {
-			if (image) {
+			if (image.data) {
 				Model model;
 				CompileModel(model, config, image);
 				render->entity.LoadModel(model);
