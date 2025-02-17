@@ -278,22 +278,22 @@ int main(int argc, char* argv[]) {
 
 		// TODO: Implementation difference kinds of grayscale processing. Currently we are only doing luminance.
 		ImGui::Text("Grayscale Preference");
-		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
-		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
-		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
+		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Text("Alpha Thickness");
-		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
+		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::SeparatorText("Mesh Configuration");
 
 		ImGui::Text("Dimensions");
-		ImGui::SliderFloat("Width", &config->sliderWidth, SLIDER_WIDTH_MIN, SLIDER_WIDTH_MAX, SLIDER_FLOAT_FORMAT_MM);
-		ImGui::SliderFloat("Height", &config->sliderHeight, SLIDER_HEIGHT_MIN, SLIDER_HEIGHT_MAX, SLIDER_FLOAT_FORMAT_MM);
+		ImGui::SliderFloat("Width", &config->sliderWidth, SLIDER_WIDTH_MIN, SLIDER_WIDTH_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Height", &config->sliderHeight, SLIDER_HEIGHT_MIN, SLIDER_HEIGHT_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Text("Thickness");
-		ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM);
-		ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM);
+		ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Spacing();
 		if (ImGui::Button("Compile")) {
