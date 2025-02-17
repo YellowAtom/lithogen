@@ -308,22 +308,15 @@ int main(int argc, char* argv[]) {
 
 		ImGui::End();
 
-		// Place the source preview in the bottom right corner.
-		ImGui::SetNextWindowPos(ImVec2(width - 150, height - 150));
-		ImGui::SetNextWindowSize(ImVec2(150, 150));
+		if (config->drawSource && image.texture != 0) {
+			// Place the source preview in the bottom right corner.
+			ImGui::SetNextWindowPos(ImVec2(width - 150, height - 150));
+			ImGui::SetNextWindowSize(ImVec2(150, 150));
 
-		ImGui::Begin("Source Preview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
-
-		if (config->drawSource) {
-			if (image.texture != 0) {
-				// TODO: If the image is too big this fails to render it correctly. Need to resize for this display.
-				ImGui::Image(image.texture, ImVec2(128, 128));
-			} else {
-				ImGui::Dummy(ImVec2(128, 128));
-			}
+			ImGui::Begin("Source Preview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
+			ImGui::Image(image.texture, ImVec2(128, 128));
+			ImGui::End();
 		}
-
-		ImGui::End();
 
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos(center);
