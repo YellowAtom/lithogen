@@ -266,24 +266,36 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Gather the window height.
-		int height; glfwGetWindowSize(mainWindow, nullptr, &height);
+		int width, height; glfwGetWindowSize(mainWindow, &width, &height);
 
 		// Push the sidepanel down to make room for the menu bar.
 		ImGui::SetNextWindowPos(ImVec2(0, GUI_MENUBAR_HEIGHT));
-		ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, static_cast<float>(height) - GUI_MENUBAR_HEIGHT));
+		ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, height - GUI_MENUBAR_HEIGHT));
 
 		ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
+		ImGui::SeparatorText("Image Processing");
+
+		// TODO: Implementation difference kinds of grayscale processing. Currently we are only doing luminance.
 		ImGui::Text("Grayscale Preference");
-		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0f, 1.0f);
-		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0f, 1.0f);
-		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0f, 1.0f);
+		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
+		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
+		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
 
-		if (image.texture != 0 ) {
-			// TODO: If the image is too big this fails to render it correctly. Need to resize for this display.
-			ImGui::Image(image.texture, ImVec2(image.width, image.height));
-		}
+		ImGui::Text("Alpha Thickness");
+		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT);
 
+		ImGui::SeparatorText("Mesh Configuration");
+
+		ImGui::Text("Dimensions");
+		ImGui::SliderFloat("Width", &config->sliderWidth, SLIDER_WIDTH_MIN, SLIDER_WIDTH_MAX, SLIDER_FLOAT_FORMAT_MM);
+		ImGui::SliderFloat("Height", &config->sliderHeight, SLIDER_HEIGHT_MIN, SLIDER_HEIGHT_MAX, SLIDER_FLOAT_FORMAT_MM);
+
+		ImGui::Text("Thickness");
+		ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM);
+		ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM);
+
+		ImGui::Spacing();
 		if (ImGui::Button("Compile")) {
 			if (image.data) {
 				Model model;
@@ -296,11 +308,28 @@ int main(int argc, char* argv[]) {
 
 		ImGui::End();
 
+		// Place the source preview in the bottom right corner.
+		ImGui::SetNextWindowPos(ImVec2(width - 150, height - 150));
+		ImGui::SetNextWindowSize(ImVec2(150, 150));
+
+		ImGui::Begin("Source Preview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
+
+		if (config->drawSource) {
+			if (image.texture != 0) {
+				// TODO: If the image is too big this fails to render it correctly. Need to resize for this display.
+				ImGui::Image(image.texture, ImVec2(128, 128));
+			} else {
+				ImGui::Dummy(ImVec2(128, 128));
+			}
+		}
+
+		ImGui::End();
+
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos(center);
 
 		if (config->aboutOpened) {
-			ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+			ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 			ImGui::Text("Version: 1.0");
 			ImGui::End();
 		}

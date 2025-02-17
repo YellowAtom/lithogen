@@ -19,7 +19,11 @@ void CompileModel(Model& model, Config* config, const Image& image) {
 			// 1. Calculate the grayscale out of the RGB values.
 			// 2. Fully transparent pixels are made thinnest and opaque is unmodified.
 			// 3. Turn the alpha adjusted grayscale value into a normalized float.
-			heightValues.push_back((config->sliderGsPref[0] * rgba[0] + config->sliderGsPref[1] * rgba[1] + config->sliderGsPref[2] * rgba[2]) * (rgba[3] / 255.0f) / 255.0f);
+			heightValues.push_back(
+				(config->sliderGsPref[0] * rgba[0] + config->sliderGsPref[1] * rgba[1] + config->sliderGsPref[2] * rgba[2])
+				* (config->sliderGsPref[3] * rgba[3] / 255.0f)
+				/ 255.0f
+			);
 		}
 
 		rgba[progress] = image.data[i];
