@@ -12,8 +12,8 @@
 #define SLIDER_THICK_MAX 20.0f
 
 // The format for sliders.
-#define SLIDER_FLOAT_FORMAT_MM "%.2f mm"
-#define SLIDER_FLOAT_FORMAT "%.2f"
+#define SLIDER_FLOAT_FORMAT_MM "%.3f mm"
+#define SLIDER_FLOAT_FORMAT "%.3f"
 
 struct Config {
 	// Menu Bar
