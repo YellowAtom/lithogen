@@ -77,6 +77,10 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
+	if (!data->render->entity.HasModel()) {
+		return;
+	}
+
 	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
 		data->render->entity.ResetRotation();
 	} else if (key == GLFW_KEY_W && action == GLFW_PRESS) {
@@ -85,8 +89,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
+bool cursorWithinViewport = false;
+
 void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
+
+	if (!data->render->entity.HasModel()) {
+		return;
+	}
 
 	// TODO: Rotating the cube too much will make this inaccurate, find a way.
 
@@ -98,8 +108,10 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	int width, height = 0;
 	glfwGetWindowSize(window, &width, &height);
 
+	cursorWithinViewport = width - x < data->render->GetViewportWidth() && height - y < data->render->GetViewportHeight();
+
 	// Is left mouse down and is the cursor within the viewport.
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && width - x < data->render->GetViewportWidth() && height - y < data->render->GetViewportHeight()) {
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && cursorWithinViewport) {
 		// Apply the difference between the previous and current mouse location to the entity's rotation.
 		data->render->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
@@ -111,7 +123,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 void ScrollCallback(GLFWwindow* window, double x, double y) {
 	auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
-	data->render->camera.Move(glm::vec3(0, 0, y / 10));
+	if (data->render->entity.HasModel() && cursorWithinViewport) {
+		data->render->camera.Move(glm::vec3(0, 0, y / 10));
+	}
 }
 
 int main(int argc, char* argv[]) {
