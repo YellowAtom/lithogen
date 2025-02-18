@@ -26,6 +26,9 @@ add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glm-1.0.1)
 add_subdirectory(deps/imgui-1.91.8)
 add_subdirectory(deps/nativefiledialog-extended-1.2.1)
+add_subdirectory(deps/opencl-headers-2024.10.24)
+add_subdirectory(deps/opencl-icd-loader-2024.10.24)
+add_subdirectory(deps/opencl-clhpp-2024.10.24)
 add_subdirectory(deps/stb_image-2.30)
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
@@ -46,6 +49,9 @@ else()
 	add_executable(App ${SOURCE_FILES})
 endif()
 
+# Set OpenCL version to 3.0.
+target_compile_definitions(App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300)
+
 target_include_directories(App PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Embed these files into the executable.
@@ -56,4 +62,4 @@ b_embed(App res/shaders/fragment.glsl)
 set_target_properties(App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(App PRIVATE glad glfw glm imgui nfd stb_image)
+target_link_libraries(App PRIVATE glad glfw glm imgui nfd OpenCL::Headers OpenCL::OpenCL OpenCL::HeadersCpp stb_image)

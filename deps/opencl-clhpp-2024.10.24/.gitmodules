@@ -1,0 +1,3 @@
+[submodule "external/CMock"]
+	path = external/CMock
+	url = https://github.com/ThrowTheSwitch/CMock

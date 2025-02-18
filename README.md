@@ -10,4 +10,7 @@ Supports loading images of types jpeg, png, tga, bmp, psd, gif, hdr, pic and exp
 - [GLM 1.0.1](https://github.com/g-truc/glm)
 - [ImGui 1.91.8](https://github.com/ocornut/imgui)
 - [Native File Dialog Extended 1.2.1](https://github.com/btzy/nativefiledialog-extended)
+- [OpenCL API C++ Bindings](https://github.com/khronosgroup/opencl-clhpp)
+- [OpenCL API Headers](https://github.com/khronosgroup/opencl-headers)
+- [OpenCL ICD Loader](https://github.com/khronosgroup/opencl-icd-loader)
 - [std_image 2.30](https://github.com/nothings/stb)
