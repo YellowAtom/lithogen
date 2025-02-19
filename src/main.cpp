@@ -310,7 +310,6 @@ int main(int argc, char* argv[]) {
 
 		ImGui::SeparatorText("Mesh Configuration");
 
-		// No hard cap for width and height, very affected by image aspect ratio.
 		ImGui::Text("Dimensions");
 
 		// TODO: The forced ratio does not clamp.
@@ -323,8 +322,18 @@ int main(int argc, char* argv[]) {
 		}
 
 		ImGui::Text("Thickness");
-		ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
+
+		if (ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM)) {
+			if (config->sliderThickMin > config->sliderThickMax) {
+				config->sliderThickMax = config->sliderThickMin;
+			}
+		}
+
+		if (ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM)) {
+			if (config->sliderThickMax < config->sliderThickMin) {
+				config->sliderThickMin = config->sliderThickMax;
+			}
+		}
 
 		ImGui::Spacing();
 		if (ImGui::Button("Compile")) {
