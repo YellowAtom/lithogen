@@ -337,12 +337,19 @@ int main(int argc, char* argv[]) {
 
 		if (config->drawSource && image.texture != 0) {
 			// Place the source preview in the bottom right corner.
-			ImGui::SetNextWindowPos(ImVec2(width - 150, height - 150));
-			ImGui::SetNextWindowSize(ImVec2(150, 150));
+			// Add 10 pixels of padding to the window edge.
+			int panelWidth = 128 * image.aspectRatioW / image.aspectRatioH;
+			ImGui::SetNextWindowPos(ImVec2(width - panelWidth - 10, height - 128 - 10));
+			ImGui::SetNextWindowSize(ImVec2(panelWidth, 128));
+
+			// Remove padding as it is only a problem for this panel.
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
 
 			ImGui::Begin("Source Preview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
-			ImGui::Image(image.texture, ImVec2(128, 128));
+			ImGui::Image(image.texture, ImVec2(128 * image.aspectRatioW / image.aspectRatioH, 128));
 			ImGui::End();
+
+			ImGui::PopStyleVar();
 		}
 
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
