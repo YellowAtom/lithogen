@@ -345,15 +345,24 @@ int main(int argc, char* argv[]) {
 		if (config->drawSource && image.texture != 0) {
 			// Place the source preview in the bottom right corner.
 			// Add 10 pixels of padding to the window edge.
-			int panelWidth = 128 * image.aspectRatioW / image.aspectRatioH;
-			ImGui::SetNextWindowPos(ImVec2(width - panelWidth - 10, height - 128 - 10));
-			ImGui::SetNextWindowSize(ImVec2(panelWidth, 128));
+			float previewWidth = 128.0f;
+			float previewHeight = 128.0f;
+
+			// Scale around the larger side.
+			if (image.aspectRatioW < image.aspectRatioH) {
+				previewHeight = 128.0f * image.aspectRatioH / image.aspectRatioW;
+			} else {
+				previewWidth = 128.0f * image.aspectRatioW / image.aspectRatioH;
+			}
+
+			ImGui::SetNextWindowPos(ImVec2(width - previewWidth - 10.0f, height - previewHeight - 10.0f));
+			ImGui::SetNextWindowSize(ImVec2(previewWidth, previewHeight));
 
 			// Remove padding as it is only a problem for this panel.
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
 			ImGui::Begin("Source Preview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
-			ImGui::Image(image.texture, ImVec2(128 * image.aspectRatioW / image.aspectRatioH, 128));
+			ImGui::Image(image.texture, ImVec2(previewWidth, previewHeight));
 			ImGui::End();
 
 			ImGui::PopStyleVar();
