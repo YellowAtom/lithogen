@@ -3,10 +3,10 @@
 // Min max values for the sliders.
 // Normalised float value sliders are always between 0 and 1.
 #define SLIDER_WIDTH_MIN 1.0f
-#define SLIDER_WIDTH_MAX 500.0f
+#define SLIDER_WIDTH_MAX 2000.0f
 
 #define SLIDER_HEIGHT_MIN 1.0f
-#define SLIDER_HEIGHT_MAX 500.0f
+#define SLIDER_HEIGHT_MAX 2000.0f
 
 #define SLIDER_THICK_MIN 0.001f
 #define SLIDER_THICK_MAX 20.0f

@@ -1,7 +1,9 @@
 
 #include <iostream>
+#include <numeric>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <glad/gl.h>
@@ -224,6 +226,15 @@ int main(int argc, char* argv[]) {
 						// Load the image from storage, it will automatically process any of the supported formats.
 						image.data = stbi_load(result, &image.width, &image.height, nullptr, 4);
 
+						// Calculate the information required to gather aspect ratio based sizing.
+						const int aspectGcd = std::gcd(image.width, image.height);
+						image.aspectRatioW = image.width / aspectGcd;
+						image.aspectRatioH = image.height / aspectGcd;
+
+						// Ensure the default width is the correct aspect ratio and reset the size when a new image is loaded.
+						config->sliderHeight = 100.0f;
+						config->sliderWidth = 100.0f * image.aspectRatioW / image.aspectRatioH;
+
 						if (image.data == nullptr) {
 							std::cout << "Failed to load image!" << std::endl;
 						} else {
@@ -274,9 +285,14 @@ int main(int argc, char* argv[]) {
 
 		ImGui::Begin("SidePanel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
+		if (!image.data) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		ImGui::SeparatorText("Image Processing");
 
-		// TODO: Implementation difference kinds of grayscale processing. Currently we are only doing luminance.
+		// TODO: Implement difference kinds of grayscale processing. Currently we are only doing luminance.
 		ImGui::Text("Grayscale Preference");
 		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT, ImGuiSliderFlags_AlwaysClamp);
 		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0f, 1.0f, SLIDER_FLOAT_FORMAT, ImGuiSliderFlags_AlwaysClamp);
@@ -287,9 +303,17 @@ int main(int argc, char* argv[]) {
 
 		ImGui::SeparatorText("Mesh Configuration");
 
+		// No hard cap for width and height, very affected by image aspect ratio.
 		ImGui::Text("Dimensions");
-		ImGui::SliderFloat("Width", &config->sliderWidth, SLIDER_WIDTH_MIN, SLIDER_WIDTH_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
-		ImGui::SliderFloat("Height", &config->sliderHeight, SLIDER_HEIGHT_MIN, SLIDER_HEIGHT_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
+
+		// TODO: The forced ratio does not clamp.
+		if (ImGui::SliderFloat("Width", &config->sliderWidth, SLIDER_WIDTH_MIN, SLIDER_WIDTH_MAX, SLIDER_FLOAT_FORMAT_MM)) {
+			config->sliderHeight = config->sliderWidth * image.aspectRatioH / image.aspectRatioW;
+		}
+
+		if (ImGui::SliderFloat("Height", &config->sliderHeight, SLIDER_HEIGHT_MIN, SLIDER_HEIGHT_MAX, SLIDER_FLOAT_FORMAT_MM)) {
+			config->sliderWidth = config->sliderHeight * image.aspectRatioW / image.aspectRatioH;
+		}
 
 		ImGui::Text("Thickness");
 		ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX, SLIDER_FLOAT_FORMAT_MM, ImGuiSliderFlags_AlwaysClamp);
@@ -297,13 +321,16 @@ int main(int argc, char* argv[]) {
 
 		ImGui::Spacing();
 		if (ImGui::Button("Compile")) {
-			if (image.data) {
-				Model model;
-				CompileModel(model, config, image);
-				render->entity.LoadModel(model);
-			}
+			Model model;
+			CompileModel(model, config, image);
+			render->entity.LoadModel(model);
 
-			// TODO: Add visual error if compile fails or attempts without an image.
+			// TODO: Add visual error if compile fails.
+		}
+
+		if (!image.data) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
 		}
 
 		ImGui::End();
