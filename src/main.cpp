@@ -19,6 +19,8 @@
 
 #ifdef OS_WINDOWS
 #include <windows.h>
+#include <dwmapi.h>
+#include <versionhelpers.h>
 #include "glfw/glfw3native.h"
 #endif
 
@@ -154,6 +156,15 @@ int main(int argc, char* argv[]) {
 		// Gather the windows native window handlers.
 		HWND hWindow = glfwGetWin32Window(mainWindow);
 		HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+		OSVERSIONINFO osvi;
+		GetVersionEx(&osvi);
+
+
+		// Set the windows title bar to dark as the application is always dark.
+		// Below should use DWMWA_USE_IMMERSIVE_DARK_MODE but that is 20 on win11 and 19 on win10, 19 seems to also work on win11.
+		constexpr BOOL darkMode = true;
+		DwmSetWindowAttribute(hWindow, 19, &darkMode, sizeof(darkMode));
 
 		// Set the .ico from the resource file as the window icon.
 		HICON hIcon = LoadIcon(hInstance, "LithoGenIcon");
