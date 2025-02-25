@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.30)
 project(LithoGen VERSION 1.0.0 LANGUAGES CXX)
 
@@ -31,38 +30,39 @@ add_subdirectory(deps/opencl-icd-loader-2024.10.24)
 add_subdirectory(deps/opencl-clhpp-2024.10.24)
 add_subdirectory(deps/stb_image-2.30)
 
+# Automatically recursively gather all source files under src.
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 if (WIN32)
 	# Create the executable, with additional files for Windows.
-	add_executable(App ${SOURCE_FILES} res/resource.rc)
+	add_executable(LithoGen_App ${SOURCE_FILES} res/resource.rc)
 
 	# Windows specific compiler definitions:
 	# WIN32_LEAN_AND_MEAN - Active optional windows api optimisation features.
 	# OS_WINDOWS - For the codebase to ask if the program will be compiling to windows.
-	target_compile_definitions(App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN)
+	target_compile_definitions(LithoGen_App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN)
 
 	# Link the Windows Desktop Window Manager API to interface with the title bar.
-	target_link_libraries(App PRIVATE dwmapi)
+	target_link_libraries(LithoGen_App PRIVATE dwmapi)
 
 	# Set the application type to windowed and force the use of the default entry point main().
-	#target_link_options(App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
+	#target_link_options(LithoGen_App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
 else()
 	# Create the executable.
-	add_executable(App ${SOURCE_FILES})
+	add_executable(LithoGen_App ${SOURCE_FILES})
 endif()
 
 # Set OpenCL version to 3.0.
-target_compile_definitions(App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300)
+target_compile_definitions(LithoGen_App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300)
 
-target_include_directories(App PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(LithoGen_App PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Embed these files into the executable.
-b_embed(App res/shaders/vertex.glsl)
-b_embed(App res/shaders/fragment.glsl)
+b_embed(LithoGen_App res/shaders/vertex.glsl)
+b_embed(LithoGen_App res/shaders/fragment.glsl)
 
 # Manually set the file name of the executable.
-set_target_properties(App PROPERTIES OUTPUT_NAME "lithogen")
+set_target_properties(LithoGen_App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(App PRIVATE glad glfw glm imgui nfd OpenCL::Headers OpenCL::OpenCL OpenCL::HeadersCpp stb_image)
+target_link_libraries(LithoGen_App PRIVATE glad glfw glm imgui nfd OpenCL::Headers OpenCL::OpenCL OpenCL::HeadersCpp stb_image)
