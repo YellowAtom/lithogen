@@ -5,6 +5,7 @@
 #include <battery/embed.hpp>
 #include "vertex.h"
 #include "entity.h"
+#include <cstring>
 
 // Shader initialization functions.
 
