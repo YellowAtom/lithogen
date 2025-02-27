@@ -7,7 +7,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <glad/gl.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <nfd_glfw3.h>
 #include <stb_image.h>
 
