@@ -15,9 +15,6 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Configuration for battery embed.
 set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
-# Global project precompiler definitions.
-add_compile_definitions(GLFW_EXPOSE_NATIVE_WIN32)
-
 # Include project dependencies.
 add_subdirectory(deps/battery-embed-1.2.19)
 add_subdirectory(deps/glad-2.0.8)
@@ -33,21 +30,28 @@ add_subdirectory(deps/stb_image-2.30)
 # Automatically recursively gather all source files under src.
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-if (WIN32)
+if (WIN32) # Windows
+	# Global project precompiler definitions.
+	add_compile_definitions()
+
 	# Create the executable, with additional files for Windows.
 	add_executable(LithoGen_App ${SOURCE_FILES} res/resource.rc)
 
 	# Windows specific compiler definitions:
 	# WIN32_LEAN_AND_MEAN - Active optional windows api optimisation features.
 	# OS_WINDOWS - For the codebase to ask if the program will be compiling to windows.
-	target_compile_definitions(LithoGen_App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN)
+	# GLFW_EXPOSE_NATIVE_WIN32 - Allows the codebase to access the native windows handle through GLFW.
+	target_compile_definitions(LithoGen_App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN, GLFW_EXPOSE_NATIVE_WIN32)
 
 	# Link the Windows Desktop Window Manager API to interface with the title bar.
 	target_link_libraries(LithoGen_App PRIVATE dwmapi)
 
 	# Set the application type to windowed and force the use of the default entry point main().
 	#target_link_options(LithoGen_App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
-else()
+elseif(UNIX AND NOT APPLE) # Linux
+	# Create the executable.
+	add_executable(LithoGen_App ${SOURCE_FILES})
+elseif(APPLE) # MacOS
 	# Create the executable.
 	add_executable(LithoGen_App ${SOURCE_FILES})
 endif()
