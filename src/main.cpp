@@ -147,8 +147,10 @@ int main(int argc, char* argv[]) {
 	// Initialize the single GLFW3 window used by this application, this also initializes an OpenGL context.
 	GLFWwindow* mainWindow = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LithoGen", nullptr, nullptr);
 
-	if (!mainWindow)
+	if (!mainWindow) {
+		std::cout << "Failed to create GLFW window" << std::endl;
 		return 1;
+	}
 
 #ifdef OS_WINDOWS
 	// Give code its own scape so the variables get garbage collected in program lifetime.
