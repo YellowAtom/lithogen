@@ -1,16 +1,18 @@
 # <img src="res/icon.png" style="width: 26px; height: 26px;"> LithoGen
 [![Build status](https://github.com/yellowatom/lithogen/actions/workflows/buildtest.yml/badge.svg)](https://github.com/yellowatom/lithogen/actions)
 
-A cross-platform lithophane generator with 3D preview and in-depth configuration written in C++ with efficiency and customizability in mind. Supports loading images of types jpeg, png, tga, bmp, psd, gif, hdr, pic and exports to stl.
+A cross-platform lithophane generator with 3D preview and in-depth configuration written in C++ with efficiency and customizability in mind. Supports loading images of types `jpeg`, `png`, `tga`, `bmp`, `psd`, `gif`, `hdr`, `pic` and exports to `stl`.
 
 ## Dependencies
-- [Battery Embed 1.2.19](https://github.com/batterycenter/embed)
-- [Glad 2.0.8](https://github.com/dav1dde/glad)
-- [GLFW 3.4](https://github.com/glfw/glfw)
-- [GLM 1.0.1](https://github.com/g-truc/glm)
-- [ImGui 1.91.8](https://github.com/ocornut/imgui)
-- [Native File Dialog Extended 1.2.1](https://github.com/btzy/nativefiledialog-extended)
-- [OpenCL API C++ Bindings](https://github.com/khronosgroup/opencl-clhpp)
-- [OpenCL API Headers](https://github.com/khronosgroup/opencl-headers)
-- [OpenCL ICD Loader](https://github.com/khronosgroup/opencl-icd-loader)
-- [std_image 2.30](https://github.com/nothings/stb)
+| Name                                                                             | Version    |
+|----------------------------------------------------------------------------------|------------|
+| [Battery Embed](https://github.com/batterycenter/embed)                          | 1.2.19     |
+| [Glad](https://github.com/dav1dde/glad)                                          | 2.0.8      |
+| [GLFW](https://github.com/glfw/glfw)                                             | 3.4        |
+| [GLM](https://github.com/g-truc/glm)                                             | 1.0.1      |
+| [Dear ImGui](https://github.com/ocornut/imgui)                                   | 1.91.8     |
+| [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended) | 1.2.1      |
+| [OpenCL API C++ Bindings](https://github.com/khronosgroup/opencl-clhpp)          | 2024.10.24 |
+| [OpenCL API Headers](https://github.com/khronosgroup/opencl-headers)             | 2024.10.24 |
+| [OpenCL ICD Loader](https://github.com/khronosgroup/opencl-icd-loader)           | 2024.10.24 |
+| [std_image](https://github.com/nothings/stb)                                     | 2.30       |
