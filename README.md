@@ -1,6 +1,4 @@
 # <img src="res/icon.png" style="width: 26px; height: 26px;"> LithoGen
-[![Build status](https://github.com/yellowatom/lithogen/actions/workflows/buildtest.yml/badge.svg)](https://github.com/yellowatom/lithogen/actions)
-
 A cross-platform lithophane generator with 3D preview and in-depth configuration written in C++ with efficiency and customizability in mind. Supports loading images of types `jpeg`, `png`, `tga`, `bmp`, `psd`, `gif`, `hdr`, `pic` and exports to `stl`.
 
 ## Dependencies
