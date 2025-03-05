@@ -31,9 +31,6 @@ add_subdirectory(deps/stb_image-2.30)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 if (WIN32) # Windows
-	# Global project precompiler definitions.
-	add_compile_definitions()
-
 	# Create the executable, with additional files for Windows.
 	add_executable(LithoGen_App ${SOURCE_FILES} res/resource.rc)
 
