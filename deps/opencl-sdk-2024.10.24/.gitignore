@@ -1,0 +1,17 @@
+# Build dir
+[Bb]uild/
+
+# Install dir
+[Ii]nstall/
+
+# Package dirs
+[Pp]ackage/
+[Pp]ackage-deb/
+
+# Cmake
+CMakeFiles/
+
+# vim
+*~
+.*.sw[op]
+.vscode
