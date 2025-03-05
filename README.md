@@ -10,5 +10,7 @@ A cross-platform lithophane generator with 3D preview and in-depth configuration
 | [GLM](https://github.com/g-truc/glm)                                             | 1.0.1      |
 | [Dear ImGui](https://github.com/ocornut/imgui)                                   | 1.91.8     |
 | [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended) | 1.2.1      |
-| [OpenCL SDK](https://github.com/khronosgroup/opencl-sdk)                         | 2024.10.24 |
+| [OpenCL API C++ Bindings](https://github.com/khronosgroup/opencl-clhpp)          | 2024.10.24 |
+| [OpenCL API Headers](https://github.com/khronosgroup/opencl-headers)             | 2024.10.24 |
+| [OpenCL ICD Loader](https://github.com/khronosgroup/opencl-icd-loader)           | 2024.10.24 |
 | [std_image](https://github.com/nothings/stb)                                     | 2.30       |

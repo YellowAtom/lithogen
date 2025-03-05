@@ -22,7 +22,9 @@ add_subdirectory(deps/glfw-3.4)
 add_subdirectory(deps/glm-1.0.1)
 add_subdirectory(deps/imgui-1.91.8)
 add_subdirectory(deps/nativefiledialog-extended-1.2.1)
-add_subdirectory(deps/opencl-sdk-2024.10.24)
+add_subdirectory(deps/opencl-headers-2024.10.24)
+add_subdirectory(deps/opencl-icd-loader-2024.10.24)
+add_subdirectory(deps/opencl-clhpp-2024.10.24)
 add_subdirectory(deps/stb_image-2.30)
 
 # Automatically recursively gather all source files under src.
