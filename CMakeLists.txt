@@ -15,6 +15,9 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Configuration for battery embed.
 set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
+# Configuration for Open CL.
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 # Include project dependencies.
 add_subdirectory(deps/battery-embed-1.2.19)
 add_subdirectory(deps/glad-2.0.8)
