@@ -17,6 +17,7 @@ set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
 # Configuration for Open CL.
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ENABLE_OPENCL_LAYERS OFF CACHE BOOL "" FORCE)
 
 # Include project dependencies.
 add_subdirectory(deps/battery-embed-1.2.19)
