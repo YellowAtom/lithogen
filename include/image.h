@@ -1,10 +1,12 @@
 #pragma once
+#include <stb_image.h>
+#include <glad/gl.h>
 
 struct Image {
 	int width = 0;
 	int height = 0;
 	int aspectRatioW = 0;
 	int aspectRatioH = 0;
-	unsigned char* data = nullptr;
-	unsigned int texture = 0;
+	stbi_uc* data = nullptr;
+	GLuint texture = 0;
 };

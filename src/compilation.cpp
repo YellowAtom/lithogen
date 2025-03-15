@@ -1,5 +1,6 @@
 
 #include "compilation.h"
+#include <cstdint>
 #include <vector>
 #include <random>
 
@@ -7,11 +8,11 @@ void CompileModel(Model& model, Config* config, const Image& image) {
 	// Stores the image's grayscale values as normalised floats.
 	std::vector<float> heightValues(image.width * image.height);
 
-	const unsigned int imageValues = image.width * image.height * 4; // The total amount of bytes from within the 4 channel image.
-	unsigned char progress = 0; // Calculate if we are looking at R, G, B or A.
-	unsigned char rgba[4]; // A buffer to store that current RGBA values.
+	const uint32_t imageValues = image.width * image.height * 4; // The total amount of bytes from within the 4 channel image.
+	uint8_t progress = 0; // Calculate if we are looking at R, G, B or A.
+	uint8_t rgba[4]; // A buffer to store that current RGBA values.
 
-	for (unsigned int i = 0; i < imageValues; i++) {
+	for (uint32_t i = 0; i < imageValues; i++) {
 		// Once we have called all 4 RGBA values.
 		if (progress == 4) {
 			progress = 0;

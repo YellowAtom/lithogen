@@ -49,7 +49,7 @@ nfdu8char_t* FileSelectImage(GLFWwindow* window) {
 }
 
 // A simple function to send the image data to the gpu and return the pointer.
-unsigned int LoadTexture(unsigned char* image, int width, int height) {
+GLuint LoadTexture(stbi_uc* image, int width, int height) {
 	GLuint imageTexture;
 	glGenTextures(1, &imageTexture);
 	glBindTexture(GL_TEXTURE_2D, imageTexture);
