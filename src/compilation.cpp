@@ -1,4 +1,3 @@
-
 #include "compilation.h"
 #include <cstdint>
 #include <vector>

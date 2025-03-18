@@ -1,4 +1,3 @@
-
 #include "camera.h"
 
 void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {

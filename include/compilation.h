@@ -1,5 +1,4 @@
 #pragma once
-
 #include "model.h"
 #include "config.h"
 #include "image.h"

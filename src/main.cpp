@@ -1,7 +1,5 @@
-
 #include <iostream>
 #include <numeric>
-
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
@@ -10,13 +8,11 @@
 #include <GLFW/glfw3.h>
 #include <nfd_glfw3.h>
 #include <stb_image.h>
-
 #include "constants.h"
 #include "render.h"
 #include "config.h"
 #include "image.h"
 #include "compilation.h"
-
 #ifdef OS_WINDOWS
 #include <windows.h>
 #include <dwmapi.h>
