@@ -1,7 +1,7 @@
 # IDE Files
-/.idea
-/.vscode
-/.vs
+/.idea/
+/.vscode/
+/.vs/
 
 # Build Files
 /cmake-build-*/
