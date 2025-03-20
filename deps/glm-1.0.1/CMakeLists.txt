@@ -15,6 +15,9 @@ set(GLM_VERSION ${GLM_VERSION_MAJOR}.${GLM_VERSION_MINOR}.${GLM_VERSION_PATCH})
 project(glm VERSION ${GLM_VERSION} LANGUAGES CXX)
 message(STATUS "GLM: Version " ${GLM_VERSION})
 
+# LithoGen Edit: These can no longer work as their associated files are not included.
+set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
 set(GLM_IS_MASTER_PROJECT OFF)
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	set(GLM_IS_MASTER_PROJECT ON)
