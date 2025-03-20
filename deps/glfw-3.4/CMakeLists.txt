@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.4...3.28 FATAL_ERROR)
 
 project(GLFW VERSION 3.4.0 LANGUAGES C)
 
+# LithoGen Edit: These can no longer work as their associated files are not included.
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 if (POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
 endif()

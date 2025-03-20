@@ -7,6 +7,11 @@ project(OpenCLHeadersCpp
 )
 enable_testing()
 
+# LithoGen Edit: These can no longer work as their associated files are not included.
+set(BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(CLHPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

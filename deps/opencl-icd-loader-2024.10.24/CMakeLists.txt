@@ -11,6 +11,9 @@ project (OpenCL-ICD-Loader
 
 find_package (Threads REQUIRED)
 
+# LithoGen Edit: These can no longer work as their associated files are not included.
+set(OPENCL_ICD_LOADER_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 # The option below allows building the ICD Loader library as a shared library

@@ -11,6 +11,9 @@ project(OpenCLHeaders
   # https://stackoverflow.com/questions/43379311/why-does-project-affect-cmakes-opinion-on-cmake-sizeof-void-p
 )
 
+# LithoGen Edit: These can no longer work as their associated files are not included.
+set(OPENCL_HEADERS_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
 option(OPENCL_HEADERS_BUILD_TESTING "Enable support for OpenCL C headers testing." OFF)
 option(OPENCL_HEADERS_BUILD_CXX_TESTS "Enable support for OpenCL C headers testing in C++ mode." ON)
 
