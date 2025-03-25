@@ -2,10 +2,12 @@
 /.idea/
 /.vscode/
 /.vs/
+/CMakeSettings.json
 
 # Build Files
 /cmake-build-*/
 /bin/
+/out/
 /build/
 /build*/
 /Testing/
