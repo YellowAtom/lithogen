@@ -133,9 +133,10 @@ int main(int argc, char* argv[]) {
 	if (!glfwInit())
 		return 1;
 
-	// The required OpenGL version (4.6).
+	// The target OpenGL version (4.0).
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Avoids old and backwards compatible OpenGL features.
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -184,7 +185,7 @@ int main(int argc, char* argv[]) {
 	// ImGui initialisation.
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(mainWindow, true); // Attach ImGui to GLFW3.
-	ImGui_ImplOpenGL3_Init("#version 460"); // Configure GLSL version to match OpenGL 4.6.
+	ImGui_ImplOpenGL3_Init("#version 400"); // Configure GLSL version to match OpenGL 4.0.
 
 	// ImGui configuration.
 	ImGui::StyleColorsDark(); // Set ImGui colours to dark mode.
