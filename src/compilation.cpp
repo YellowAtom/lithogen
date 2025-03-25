@@ -3,7 +3,7 @@
 #include <vector>
 #include <random>
 
-void CompileModel(Model& model, Config* config, const Image& image) {
+void CompileModel(Model& model, const Config* config, const Image& image) {
 	// Stores the image's grayscale values as normalised floats.
 	std::vector<float> heightValues(image.width * image.height);
 

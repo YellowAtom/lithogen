@@ -3,4 +3,4 @@
 #include "config.h"
 #include "image.h"
 
-void CompileModel(Model& model, Config* config, const Image& image);
+void CompileModel(Model& model, const Config* config, const Image& image);

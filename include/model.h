@@ -4,5 +4,5 @@
 
 struct Model {
 	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	std::vector<uint32_t> indices;
 };
