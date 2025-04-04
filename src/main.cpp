@@ -17,7 +17,7 @@
 #include <windows.h>
 #include <dwmapi.h>
 #include <versionhelpers.h>
-#include "glfw/glfw3native.h"
+#include <GLFW/glfw3native.h>
 #endif
 
 nfdu8char_t* FileSelectImage(GLFWwindow* window) {

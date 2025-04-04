@@ -56,7 +56,6 @@ elseif(APPLE) # MacOS
 endif()
 
 target_compile_definitions(LithoGen_App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300) # Set OpenCL version to 3.0.
-target_include_directories(LithoGen_App PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Embed these files into the executable.
 b_embed(LithoGen_App res/shaders/vertex.glsl)
