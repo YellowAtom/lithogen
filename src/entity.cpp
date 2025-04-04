@@ -2,6 +2,7 @@
 #include <iostream>
 #include <glad/gl.h>
 #include <battery/embed.hpp>
+#include <cstring>
 #include "vertex.h"
 #include "entity.h"
 
