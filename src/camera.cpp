@@ -9,6 +9,8 @@ void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {
 	const float a = (-m_farZ - m_nearZ) / zRange;
 	const float b = 2.0F * m_farZ * m_nearZ / zRange;
 
+	// clang-format off
+
 	// The projection matrix. calculated form aspect ratio, fov and clip planes.
 	mvp *= glm::mat4(
 		d / aspectRatio, 0.0F, 0.0F, 0.0F,
@@ -34,6 +36,8 @@ void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {
 		u.z, v.z, n.z, 0.0F,
 		0.0F, 0.0F, 0.0F, 1.0F
 	);
+
+	// clang-format on
 
 	mvp *= cameraTranslation * cameraRotation;
 }

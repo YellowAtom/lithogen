@@ -95,6 +95,8 @@ Entity::Entity(const Model& model) {
 }
 
 void Entity::Draw(glm::mat4 mvp) const {
+	// clang-format off
+
 	// Apply scale to the matrix.
 	const glm::mat4 s(
 		m_scale.x, 0.0F, 0.0F, 0.0F,
@@ -137,6 +139,8 @@ void Entity::Draw(glm::mat4 mvp) const {
 		0.0F, 0.0F, 0.0F, 1.0F
 	);
 
+	// clang-format on
+
 	// Combine the matrices into the world matrix in the correct order.
 	mvp *= t * (rz * ry * rx) * s;
 
@@ -172,11 +176,13 @@ void Entity::LoadModel(const Model& model) {
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.vertices.size() * sizeof(Vertex)), model.vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.vertices.size() * sizeof(Vertex)),
+				 model.vertices.data(), GL_STATIC_DRAW);
 
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.indices.size() * sizeof(Vertex)), model.indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.indices.size() * sizeof(Vertex)),
+				 model.indices.data(), GL_STATIC_DRAW);
 
 	// Tell the driver how to read position from the buffer.
 	glEnableVertexAttribArray(0);
