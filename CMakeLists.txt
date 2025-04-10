@@ -55,7 +55,9 @@ elseif(APPLE) # MacOS
 	add_executable(LithoGen_App ${SOURCE_FILES})
 endif()
 
-target_compile_definitions(LithoGen_App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300) # Set OpenCL version to 3.0.
+# CL_HPP_TARGET_OPENCL_VERSION - Set OpenCL version to 3.0.
+# GLFW_INCLUDE_NONE - Prevent a compatability issue between Glad and GLFW.
+target_compile_definitions(LithoGen_App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300 GLFW_INCLUDE_NONE)
 
 # Embed these files into the executable.
 b_embed(LithoGen_App res/shaders/vertex.glsl)

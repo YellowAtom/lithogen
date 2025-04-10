@@ -1,6 +1,7 @@
 #pragma once
-#include <stb_image.h>
+
 #include <glad/gl.h>
+#include <stb_image.h>
 
 struct Image {
 	int width = 0;

@@ -1,77 +1,83 @@
-#include <algorithm>
-#include <iostream>
-#include <glad/gl.h>
-#include <battery/embed.hpp>
-#include <cstring>
-#include "vertex.h"
 #include "entity.h"
+#include <algorithm>
+#include <battery/embed.hpp>
+#include <climits>
+#include <cstring>
+#include <glad/gl.h>
+#include <glm/trigonometric.hpp>
+#include <iostream>
+#include "vertex.h"
 
 // Shader initialization functions.
 
-unsigned int LoadShader(const char* pFileContent, const int shaderType) {
-	unsigned int shader = glCreateShader(shaderType);
+GLuint LoadShader(const char* pFileContent, const GLenum shaderType) {
+	const GLuint shader = glCreateShader(shaderType);
 
 	if (shader == 0) {
-		std::cout << "Error creating shader type" << std::endl;
+		std::cout << "Error creating shader type!\n";
 		exit(1);
 	}
 
-	const char* shaders[1];
-	shaders[0] = pFileContent;
+	const char* shaders[1] = {pFileContent};
+	const size_t length = strlen(pFileContent);
 
-	int lengths[1];
-	lengths[0] = strlen(pFileContent);
+	if (length > INT_MAX) {
+		std::cout << "Shader file \"" << shaderType << "\" too large!\n";
+		exit(1);
+	}
 
-	int success;
+	const GLint lengths[1] = {static_cast<GLint>(length)};
+
+	GLint success = 0;
 
 	glShaderSource(shader, 1, shaders, lengths);
 	glCompileShader(shader);
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-	if (!success) {
+	if (success == 0) {
 		char infoLog[512];
 		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cout << "Failed to compile shader type \"" << shaderType << "\": \n" << infoLog << std::endl;
+		std::cout << "Failed to compile shader type \"" << shaderType << "\":\n" << infoLog << '\n';
 		exit(1);
 	}
 
 	return shader;
 }
 
-unsigned int InitShaders() {
-	const unsigned int shaderProgram = glCreateProgram();
+GLuint InitShaders() {
+	const GLuint shaderProgram = glCreateProgram();
 
 	if (shaderProgram == 0) {
-		std::cout << "Error creating shader program" << std::endl;
+		std::cout << "Error creating shader program!\n";
 		exit(1);
 	}
 
-	const unsigned int vertShader = LoadShader(b::embed<"res/shaders/vertex.glsl">().data(), GL_VERTEX_SHADER);
-	const unsigned int fragShader = LoadShader(b::embed<"res/shaders/fragment.glsl">().data(), GL_FRAGMENT_SHADER);
+	const GLuint vertShader = LoadShader(b::embed<"res/shaders/vertex.glsl">().data(), GL_VERTEX_SHADER);
+	const GLuint fragShader = LoadShader(b::embed<"res/shaders/fragment.glsl">().data(), GL_FRAGMENT_SHADER);
 
 	// Attach the finalised shaders to a shader program to be used by the rest of the program.
 	glAttachShader(shaderProgram, vertShader);
 	glAttachShader(shaderProgram, fragShader);
 
-	int success;
+	GLint success = 0;
 
 	glLinkProgram(shaderProgram);
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
-	if (!success) {
+	if (success == 0) {
 		char infoLog[512];
 		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-		std::cout << "Failed to link shader program: \n" << infoLog << std::endl;
+		std::cout << "Failed to link shader program:\n" << infoLog << '\n';
 		exit(1);
 	}
 
 	glValidateProgram(shaderProgram);
 	glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
 
-	if (!success) {
+	if (success == 0) {
 		char infoLog[512];
 		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-		std::cout << "Failed to validate shader program: \n" << infoLog << std::endl;
+		std::cout << "Failed to validate shader program:\n" << infoLog << '\n';
 		exit(1);
 	}
 
@@ -91,18 +97,18 @@ Entity::Entity(const Model& model) {
 void Entity::Draw(glm::mat4 mvp) const {
 	// Apply scale to the matrix.
 	const glm::mat4 s(
-		m_scale.x, 0.0f, 0.0f, 0.0f,
-		0.0f, m_scale.y, 0.0f, 0.0f,
-		0.0f, 0.0f, m_scale.z, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
+		m_scale.x, 0.0F, 0.0F, 0.0F,
+		0.0F, m_scale.y, 0.0F, 0.0F,
+		0.0F, 0.0F, m_scale.z, 0.0F,
+		0.0F, 0.0F, 0.0F, 1.0F
 	);
 
 	// Apply translation / position to the matrix.
 	const glm::mat4 t(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		m_position.x, m_position.y, m_position.z, 1.0f
+		1.0F, 0.0F, 0.0F, 0.0F,
+		0.0F, 1.0F, 0.0F, 0.0F,
+		0.0F, 0.0F, 1.0F, 0.0F,
+		m_position.x, m_position.y, m_position.z, 1.0F
 	);
 
 	// Apply rotation to the matrix.
@@ -111,24 +117,24 @@ void Entity::Draw(glm::mat4 mvp) const {
 	const float rotateZ = glm::radians(m_rotation.z);
 
 	const glm::mat4 rx(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, cosf(rotateX), sinf(rotateX), 0.0f,
-		0.0f, -sinf(rotateX), cosf(rotateX), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
+		1.0F, 0.0F, 0.0F, 0.0F,
+		0.0F, cosf(rotateX), sinf(rotateX), 0.0F,
+		0.0F, -sinf(rotateX), cosf(rotateX), 0.0F,
+		0.0F, 0.0F, 0.0F, 1.0F
 	);
 
 	const glm::mat4 ry(
-		cosf(rotateY), 0.0f, sinf(rotateY), 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		-sinf(rotateY), 0.0f, cosf(rotateY), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
+		cosf(rotateY), 0.0F, sinf(rotateY), 0.0F,
+		0.0F, 1.0F, 0.0F, 0.0F,
+		-sinf(rotateY), 0.0F, cosf(rotateY), 0.0F,
+		0.0F, 0.0F, 0.0F, 1.0F
 	);
 
 	const glm::mat4 rz(
-		cosf(rotateZ), 0.0f, sinf(rotateZ), 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		-sinf(rotateZ), 0.0f, cosf(rotateZ), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
+		cosf(rotateZ), 0.0F, sinf(rotateZ), 0.0F,
+		0.0F, 1.0F, 0.0F, 0.0F,
+		-sinf(rotateZ), 0.0F, cosf(rotateZ), 0.0F,
+		0.0F, 0.0F, 0.0F, 1.0F
 	);
 
 	// Combine the matrices into the world matrix in the correct order.
@@ -148,7 +154,7 @@ void Entity::Draw(glm::mat4 mvp) const {
 }
 
 void Entity::LoadModel(const Model& model) {
-	const unsigned int shaderProgram = InitShaders();
+	const GLuint shaderProgram = InitShaders();
 
 	// Clear out the previous model if it exists.
 	if (HasModel()) {
@@ -161,14 +167,16 @@ void Entity::LoadModel(const Model& model) {
 	glBindVertexArray(m_vao);
 
 	// Allocate, configure and bind the buffers.
-	unsigned int VBO, IBO;
+	GLuint VBO = 0;
+	GLuint IBO = 0;
+
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, model.vertices.size() * sizeof(Vertex), &model.vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.vertices.size() * sizeof(Vertex)), model.vertices.data(), GL_STATIC_DRAW);
 
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indices.size() * sizeof(Vertex), &model.indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.indices.size() * sizeof(Vertex)), model.indices.data(), GL_STATIC_DRAW);
 
 	// Tell the driver how to read position from the buffer.
 	glEnableVertexAttribArray(0);
@@ -194,7 +202,7 @@ void Entity::SetPosition(const glm::vec3& position) {
 
 void Entity::SetRotation(const glm::vec3& rotation) {
 	// Disallow setting rotations higher than 360 degrees.
-	assert(rotation.x < 360.0f || rotation.y < 360.0f || rotation.z < 360.0f);
+	assert(rotation.x < 360.0F || rotation.y < 360.0F || rotation.z < 360.0F);
 
 	m_rotation = rotation;
 }
@@ -203,9 +211,9 @@ void Entity::Rotate(const glm::vec3& rotation) {
 	m_rotation += rotation;
 
 	// Ensure rotation does not go over 360 degrees to avoid precision loss.
-	m_rotation.x = m_rotation.x >= 360.0f ? m_rotation.x - 360.0f : m_rotation.x;
-	m_rotation.y = m_rotation.y >= 360.0f ? m_rotation.y - 360.0f : m_rotation.y;
-	m_rotation.z = m_rotation.z >= 360.0f ? m_rotation.z - 360.0f : m_rotation.z;
+	m_rotation.x = m_rotation.x >= 360.0F ? m_rotation.x - 360.0F : m_rotation.x;
+	m_rotation.y = m_rotation.y >= 360.0F ? m_rotation.y - 360.0F : m_rotation.y;
+	m_rotation.z = m_rotation.z >= 360.0F ? m_rotation.z - 360.0F : m_rotation.z;
 }
 
 void Entity::SetScale(const glm::vec3& scale) {
@@ -213,5 +221,5 @@ void Entity::SetScale(const glm::vec3& scale) {
 }
 
 void Entity::ResetRotation() {
-	SetRotation(glm::vec3(0.0f, 0.0f, 0.0f)); // Reset object rotation.
+	SetRotation(glm::vec3(0.0F, 0.0F, 0.0F)); // Reset object rotation.
 }

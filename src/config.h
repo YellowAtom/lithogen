@@ -2,16 +2,16 @@
 
 // Min max values for the sliders.
 // Normalised float value sliders are always between 0 and 1.
-#define SLIDER_WIDTH_MIN 1.0f
-#define SLIDER_WIDTH_MAX 2000.0f
-#define SLIDER_HEIGHT_MIN 1.0f
-#define SLIDER_HEIGHT_MAX 2000.0f
-#define SLIDER_THICK_MIN 0.001f
-#define SLIDER_THICK_MAX 20.0f
+#define SLIDER_WIDTH_MIN 1.0F
+#define SLIDER_WIDTH_MAX 2000.0F
+#define SLIDER_HEIGHT_MIN 1.0F
+#define SLIDER_HEIGHT_MAX 2000.0F
+#define SLIDER_THICK_MIN 0.001F
+#define SLIDER_THICK_MAX 20.0F
 
 // The format for sliders.
-#define SLIDER_FLOAT_FORMAT_MM "%.3f mm"
-#define SLIDER_FLOAT_FORMAT "%.3f"
+#define SLIDER_FLOAT_FORMAT_MM "%.3F mm"
+#define SLIDER_FLOAT_FORMAT "%.3F"
 
 struct Config {
 	// Menu Bar
@@ -20,11 +20,11 @@ struct Config {
 	bool drawWireframe = false;
 
 	// Side Panel
-	float sliderWidth = 100.0f;
-	float sliderHeight = 100.0f;
-	float sliderThickMin = 0.001f;
-	float sliderThickMax = 20.0f;
-	float sliderGsPref[4] = {0.3f, 0.59f, 0.11f, 0.0f};
+	float sliderWidth = 100.0F;
+	float sliderHeight = 100.0F;
+	float sliderThickMin = 0.001F;
+	float sliderThickMax = 20.0F;
+	float sliderGsPref[4] = {0.3F, 0.59F, 0.11F, 0.0F};
 
 	// Backend
 	bool aboutOpened = false;
