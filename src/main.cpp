@@ -73,12 +73,12 @@ void FramebufferSizeCallback(GLFWwindow* window, const int width, const int heig
 void KeyCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
 	const auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
-	if (!data->render->GetEntity().HasModel()) {
+	if (!data->render->entity.HasModel()) {
 		return;
 	}
 
 	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-		data->render->GetEntity().ResetRotation();
+		data->render->entity.ResetRotation();
 	} else if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 		data->config->drawWireframe = !data->config->drawWireframe;
 		data->render->UpdateWireframe();
@@ -88,7 +88,7 @@ void KeyCallback(GLFWwindow* window, const int key, const int scancode, const in
 void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
-	if (!data->render->GetEntity().HasModel()) {
+	if (!data->render->entity.HasModel()) {
 		return;
 	}
 
@@ -109,7 +109,7 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	// Is left mouse down and is the cursor within the viewport.
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && data->cursorWithinViewport) {
 		// Apply the difference between the previous and current mouse location to the entity's rotation.
-		data->render->GetEntity().Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
+		data->render->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
 	}
 
 	previousX = x;
@@ -119,8 +119,8 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 void ScrollCallback(GLFWwindow* window, const double x, const double y) {
 	const auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
-	if (data->render->GetEntity().HasModel() && data->cursorWithinViewport) {
-		data->render->GetCamera().Move(glm::vec3(0, 0, y / 10));
+	if (data->render->entity.HasModel() && data->cursorWithinViewport) {
+		data->render->camera.Move(glm::vec3(0, 0, y / 10));
 	}
 }
 
@@ -252,7 +252,7 @@ int main(int argc, char* argv[]) {
 					render->UpdateWireframe();
 				}
 				if (ImGui::MenuItem("Reset Preview", "R")) {
-					render->GetEntity().ResetRotation();
+					render->entity.ResetRotation();
 				}
 				ImGui::EndMenu();
 			}
@@ -333,7 +333,7 @@ int main(int argc, char* argv[]) {
 		if (ImGui::Button("Compile")) {
 			Model model;
 			CompileModel(model, config, image);
-			render->GetEntity().LoadModel(model);
+			render->entity.LoadModel(model);
 
 			// TODO: Add visual error if compile fails.
 		}

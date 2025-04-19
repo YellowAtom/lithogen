@@ -10,19 +10,16 @@ public:
 	explicit Render(GLFWwindow* window, Config* config);
 	void Draw() const;
 
-	[[nodiscard]] Camera GetCamera() const;
-	[[nodiscard]] Entity GetEntity() const;
-
 	void UpdateWireframe() const;
 	void CalcViewport(int width, int height);
 
 	[[nodiscard]] int GetViewportWidth() const;
 	[[nodiscard]] int GetViewportHeight() const;
 	[[nodiscard]] float GetAspectRatio() const;
-private:
-	Camera m_camera;
-	Entity m_entity;
 
+	Camera camera;
+	Entity entity;
+private:
 	GLFWwindow* m_window = nullptr;
 	Config* m_config = nullptr;
 

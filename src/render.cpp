@@ -8,7 +8,7 @@ Render::Render(GLFWwindow* window, Config* config) : m_window(window), m_config(
 	glfwMakeContextCurrent(window);
 
 	// Move the starting position of the entity.
-	m_entity.SetPosition(glm::vec3(0.0F, 0.0F, 2.0F));
+	entity.SetPosition(glm::vec3(0.0F, 0.0F, 2.0F));
 
 	// Call this during init as the resize callback is not called on startup.
 	CalcViewport(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
@@ -16,19 +16,11 @@ Render::Render(GLFWwindow* window, Config* config) : m_window(window), m_config(
 
 void Render::Draw() const {
 	// Only draw if desired and if a model has been compiled.
-	if (m_config->drawPreview && m_entity.HasModel()) {
+	if (m_config->drawPreview && entity.HasModel()) {
 		glm::mat4 mvp(1.0F);
-		m_camera.ApplyMatrix(mvp, GetAspectRatio());
-		m_entity.Draw(mvp);
+		camera.ApplyMatrix(mvp, GetAspectRatio());
+		entity.Draw(mvp);
 	}
-}
-
-Camera Render::GetCamera() const {
-	return m_camera;
-}
-
-Entity Render::GetEntity() const {
-	return m_entity;
 }
 
 void Render::UpdateWireframe() const {
