@@ -210,6 +210,10 @@ int main(int argc, char* argv[]) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Import")) {
 					if (nfdu8char_t* result = FileSelectImage(mainWindow)) {
+						if (image.data != nullptr) {
+							stbi_image_free(image.data);
+						}
+
 						// Load the image from storage, it will automatically process any of the supported formats.
 						image.data = stbi_load(result, &image.width, &image.height, nullptr, 4);
 
