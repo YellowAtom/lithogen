@@ -40,4 +40,5 @@ openmp-use-default-none,
 -cppcoreguidelines-pro-type-union-access,
 -bugprone-easily-swappable-parameters,
 -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
--cppcoreguidelines-pro-type-vararg'
+-cppcoreguidelines-pro-type-vararg,
+-readability-math-missing-parentheses'
