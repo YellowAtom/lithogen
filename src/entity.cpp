@@ -181,7 +181,7 @@ void Entity::LoadModel(const Model& model) {
 
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.indices.size() * sizeof(Vertex)),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model.indices.size() * sizeof(uint32_t)),
 				 model.indices.data(), GL_STATIC_DRAW);
 
 	// Tell the driver how to read position from the buffer.
