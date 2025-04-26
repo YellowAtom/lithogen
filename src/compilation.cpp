@@ -35,12 +35,15 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		progress++;
 	}
 
+	// TODO: Move vertices from resize() to reserve() if it is faster. This will require implementing the loop to only
+	// use emplace_back.
+
 	// Pre-allocate the space to avoid dynamic memory overhead.
-	// - Vertices prediction first calculates the vertex count of pixels touching the edge which will give 2 each, then
-	// every other pixel which is one new vertex each.
+	// - Each row and column of vertices is just the pixel count plus one, multiplied by each other with give the total
+	// amount.
 	// - Indices prediction is simply 6 per pixel as each pixel is two triangles.
-	model.vertices.reserve(image.width * 2 + image.height * 2 + pixelHeights.size() - (image.width + image.height - 1));
-	model.indices.reserve(pixelHeights.size() * 6);
+	model.vertices.resize((image.width + 1) * (image.height + 1));
+	model.indices.reserve(pixelCount * 6);
 
 	// TODO: Different vertices need to interp height based on sounding vertices and colour needs to account for this.
 	// Step 1: Make sure each line interps values horizontally
@@ -48,47 +51,82 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	// fishing the first row line.
 
 	// TODO: Add option to change pixel size.
-	constexpr float pixelSize = 1;
+	constexpr float pixelSize = 1.0F;
 
 	int column = 0;
+	size_t nextIndex = 0; // Keeps track of the vertex count, needed as last row is inserted parallel.
 
-	for (int i = 0; i < pixelHeights.size(); i++) {
+	for (int i = 0; i < pixelCount; i++) {
+		// === Vertex Generation ===
 		const int row = i / image.width;
-		const bool firstInRow = i - row * image.width == 0;
+		const bool lastRow = row == image.height - 1;
 		// const float height = pixelHeights[i];
 
-		if (firstInRow) {
+		// If the first in the row.
+		if (i - row * image.height == 0) {
 			column = 0;
-			model.vertices.emplace_back(glm::vec3(column * pixelSize, row * pixelSize, 0), glm::vec3(0, 0, 0));
-		}
 
-		model.vertices.emplace_back(glm::vec3(column * pixelSize + 1, row * pixelSize, 0), glm::vec3(0, 0, 0));
+			model.vertices[nextIndex] = Vertex(glm::vec3(column * pixelSize, row * pixelSize, 0), glm::vec3(0, 0, 0));
 
-		// Only do this for the last row.
-		if (row == image.height - 1) {
-			if (firstInRow) {
-				model.vertices.emplace_back(glm::vec3(column * pixelSize, (row + 1) * pixelSize, 0),
-											glm::vec3(0, 0, 0));
+			if (lastRow) {
+				model.vertices[nextIndex + (image.width + 1)] =
+					Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, 0), glm::vec3(0, 0, 0));
 			}
 
-			model.vertices.emplace_back(glm::vec3(column * pixelSize + 1, (row + 1) * pixelSize, 0),
-										glm::vec3(0, 0, 0));
+			nextIndex++;
+		}
+
+		model.vertices[nextIndex] = Vertex(glm::vec3(column * pixelSize + 1, row * pixelSize, 0), glm::vec3(0, 0, 0));
+
+		if (lastRow) {
+			model.vertices[nextIndex + (image.width + 1)] =
+				Vertex(glm::vec3(column * pixelSize + 1, (row + 1) * pixelSize, 0), glm::vec3(0, 0, 0));
+		}
+
+		nextIndex++;
+
+		// === Index Generation (Parallel but not connected) ===
+		bool invertTriangles = i % 2 == 0;
+
+		// Invert the invert every other row.
+		if (row % 2 == 0) {
+			invertTriangles = !invertTriangles;
 		}
 
 		// Build indices map for current pixel.
 		// - Adding the pixel index will shift the triangles along by 1 each time, creating the grid.
 		// - Adding the row will ensure the indices does not attempt to wrap one side of the plane to the other
 		// through skipping the triangles that would cause this.
+		if (invertTriangles) {
+			model.indices.push_back(i + row + 0);
+			model.indices.push_back(i + row + (0 + (image.width + 1)));
+			model.indices.push_back(i + row + 1);
 
-		// TODO: I think the organisation here is incorrect.
-		model.indices.push_back(i + row + (0 + image.width));
-		model.indices.push_back(i + row + 0);
-		model.indices.push_back(i + row + (1 + image.width));
+			model.indices.push_back(i + row + 1);
+			model.indices.push_back(i + row + (0 + (image.width + 1)));
+			model.indices.push_back(i + row + (1 + (image.width + 1)));
+		} else {
+			model.indices.push_back(i + row + 1);
+			model.indices.push_back(i + row + 0);
+			model.indices.push_back(i + row + (1 + (image.width + 1)));
 
-		model.indices.push_back(i + row + (1 + image.width));
-		model.indices.push_back(i + row + 0);
-		model.indices.push_back(i + row + 1);
+			model.indices.push_back(i + row + 0);
+			model.indices.push_back(i + row + (0 + (image.width + 1)));
+			model.indices.push_back(i + row + (1 + (image.width + 1)));
+		}
 
 		column++;
 	}
+
+	// Debug Vertex Positions.
+	/* for (int i = 0; i < model.vertices.size(); i++) {
+		std::cout << i << " = " << model.vertices[i].position.x << ", " << model.vertices[i].position.y << '\n';
+	}
+
+	std::cout << "==============\n";
+
+	// Debug Index List.
+	for (int i = 0; i < model.indices.size(); i++) {
+		std::cout << i / 6 + 1 << " = " << model.indices[i] << '\n';
+	} */
 }
