@@ -150,8 +150,9 @@ void Entity::Draw(glm::mat4 mvp) const {
 	// Bind the VAO referencing the vertex and indices buffers.
 	glBindVertexArray(m_vao);
 
+	// TODO: FUCKKK. You did this!!! Need to make this dynamic.
 	// Draw the given data to the screen.
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, nullptr);
 
 	// Unbind the VAO to ensure a clear OpenGL state.
 	glBindVertexArray(0);
@@ -166,6 +167,7 @@ void Entity::LoadModel(const Model& model) {
 	}
 
 	m_mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
+	m_indicesCount = model.indices.size();
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);

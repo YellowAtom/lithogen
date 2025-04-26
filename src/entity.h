@@ -25,4 +25,5 @@ private:
 
 	unsigned int m_vao = 0;
 	int m_mvpLoc = 0;
+	size_t m_indicesCount = 0;
 };

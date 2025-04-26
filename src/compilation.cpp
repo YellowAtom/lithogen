@@ -76,11 +76,12 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			nextIndex++;
 		}
 
-		model.vertices[nextIndex] = Vertex(glm::vec3(column * pixelSize + 1, row * pixelSize, 0), glm::vec3(0, 0, 0));
+		model.vertices[nextIndex] =
+			Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, 0), glm::vec3(0, 0, 0));
 
 		if (lastRow) {
 			model.vertices[nextIndex + (image.width + 1)] =
-				Vertex(glm::vec3(column * pixelSize + 1, (row + 1) * pixelSize, 0), glm::vec3(0, 0, 0));
+				Vertex(glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, 0), glm::vec3(0, 0, 0));
 		}
 
 		nextIndex++;
