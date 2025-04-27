@@ -339,6 +339,9 @@ int main(int argc, char* argv[]) {
 			CompileModel(model, config, image);
 			render->entity.LoadModel(model);
 
+			// Offset the position by the centre offset.
+			render->entity.SetPosition(-model.centerOffset);
+
 			// TODO: Add visual error if compile fails.
 		}
 

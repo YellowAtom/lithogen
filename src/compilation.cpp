@@ -1,39 +1,12 @@
 #include "compilation.h"
+#include <chrono>
 #include <cstdint>
+#include <iostream>
 #include <vector>
 
 void CompileModel(Model& model, const Config* config, const Image& image) {
+	const auto startTime = std::chrono::high_resolution_clock::now();
 	const int pixelCount = image.width * image.height;
-
-	// Stores the image's grayscale values as normalised floats.
-	std::vector<float> pixelHeights;
-	pixelHeights.reserve(pixelCount);
-
-	uint8_t progress = 0; // Calculate if we are looking at R, G, B or A.
-	stbi_uc rgba[4]; // A buffer to store the current RGBA values.
-
-	// Loop through the total amount of bytes from within the 4 channel image.
-	for (int i = 0; i <= pixelCount * 4; i++) {
-		// Once we have called all 4 RGBA values.
-		if (progress == 4) {
-			progress = 0;
-
-			// Calculate the grayscale out of the RGB values, weighted by the config.
-			const float grayScale = config->sliderGsPref[0] * rgba[0] + config->sliderGsPref[1] * rgba[1] +
-									config->sliderGsPref[2] * rgba[2];
-
-			// TODO: Implement "sliderGsPref[3]" to scale the alpha between inverted and not.
-			// Fully transparent pixels are made thinnest and opaque is unmodified, weighted by config.
-			const float alphaScale = rgba[3] / 255.0F;
-
-			// Turn the alpha adjusted grayscale value into a normalized float.
-			pixelHeights.push_back(grayScale * alphaScale / 255.0F);
-		}
-
-		// TODO: Validate we aren't over reading.
-		rgba[progress] = image.data[i];
-		progress++;
-	}
 
 	// TODO: Move vertices from resize() to reserve() if it is faster. This will require implementing the loop to only
 	// use emplace_back.
@@ -45,48 +18,70 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	model.vertices.resize((image.width + 1) * (image.height + 1));
 	model.indices.reserve(pixelCount * 6);
 
-	// TODO: Different vertices need to interp height based on sounding vertices and colour needs to account for this.
-	// Step 1: Make sure each line interps values horizontally
-	// Step 2: Make sure the same happens vertically, which should be possible through being on the second row loop when
-	// fishing the first row line.
-
 	// TODO: Add option to change pixel size.
-	constexpr float pixelSize = 1.0F;
+	constexpr float pixelSize = 0.01F; // Millimeters seems to be unit x2.
+	constexpr float depthScale = 0.05F;
 
+	// Stores the current column the pixel belongs to.
 	int column = 0;
-	size_t nextIndex = 0; // Keeps track of the vertex count, needed as last row is inserted parallel.
+	// Pixels must be read backwards as the mesh is generated from the bottom left. TODO: Maybe this could be avoided.
+	int nextHeight = 0;
+	// Keeps track of the vertex count, needed as last row is inserted parallel.
+	size_t nextIndex = 0;
 
 	for (int i = 0; i < pixelCount; i++) {
-		// === Vertex Generation ===
 		const int row = i / image.width;
 		const bool lastRow = row == image.height - 1;
-		// const float height = pixelHeights[i];
+		const bool firstInRow = i - row * image.height == 0;
 
-		// If the first in the row.
-		if (i - row * image.height == 0) {
+		// === Image Processing ===
+		if (firstInRow) {
+			nextHeight = (image.height - 1 - row) * image.width;
+		}
+
+		const int rgbaIndex = nextHeight * 4;
+
+		// Calculate the grayscale out of the RGB values, weighted by the config.
+		const float grayScale = config->sliderGsPref[0] * image.data[rgbaIndex] +
+								config->sliderGsPref[1] * image.data[rgbaIndex + 1] +
+								config->sliderGsPref[2] * image.data[rgbaIndex + 2];
+
+		// TODO: Implement "sliderGsPref[3]" to scale the alpha between inverted and not.
+		// TODO: WRONG, 1 is the THINNEST, 0 is the THICKEST. Reverse it.
+		// Fully transparent pixels are made thinnest and opaque is unmodified.
+		const float alphaScale = image.data[rgbaIndex + 3] / 255.0F;
+
+		// Turn the alpha adjusted grayscale value into a normalized float where 0 is thick and 1 is thin.
+		const float depth = grayScale * alphaScale / 255.0F;
+
+		nextHeight++;
+
+		// === Vertex Generation ===
+		if (firstInRow) {
 			column = 0;
 
-			model.vertices[nextIndex] = Vertex(glm::vec3(column * pixelSize, row * pixelSize, 0), glm::vec3(0, 0, 0));
+			model.vertices[nextIndex] =
+				Vertex(glm::vec3(column * pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 			if (lastRow) {
 				model.vertices[nextIndex + (image.width + 1)] =
-					Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, 0), glm::vec3(0, 0, 0));
+					Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 			}
 
 			nextIndex++;
 		}
 
 		model.vertices[nextIndex] =
-			Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, 0), glm::vec3(0, 0, 0));
+			Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 		if (lastRow) {
-			model.vertices[nextIndex + (image.width + 1)] =
-				Vertex(glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, 0), glm::vec3(0, 0, 0));
+			model.vertices[nextIndex + (image.width + 1)] = Vertex(
+				glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 		}
 
 		nextIndex++;
 
-		// === Index Generation (Parallel but not connected) ===
+		// === Index Generation ===
 		bool invertTriangles = i % 2 == 0;
 
 		// Invert the invert every other row.
@@ -118,6 +113,21 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		column++;
 	}
+
+	// TODO: This works but it sucks.
+	// Acquire centre offset to centre the mesh in the view port later and ensure it is still accurate if there is an
+	// odd amount.
+	if (const size_t totalVertices = model.vertices.size() - 1; totalVertices % 2 == 0) {
+		model.centerOffset = model.vertices[totalVertices / 2].position;
+	} else {
+		model.centerOffset = model.vertices[model.indices[(model.indices.size() - 1) / 2]].position;
+	}
+
+	const auto endTimePoint = std::chrono::high_resolution_clock::now();
+	const std::chrono::duration<double, std::milli> elapsedTime = endTimePoint - startTime;
+
+	std::cout << "Mesh compiled in " << elapsedTime.count() << "ms\n";
+	std::flush(std::cout);
 
 	// Debug Vertex Positions.
 	/* for (int i = 0; i < model.vertices.size(); i++) {
