@@ -32,9 +32,10 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	for (int i = 0; i < pixelCount; i++) {
 		const int row = i / image.width;
 		const bool lastRow = row == image.height - 1;
-		const bool firstInRow = i - row * image.height == 0;
+		const bool firstInRow = i - row * image.width == 0;
 
 		// === Image Processing ===
+
 		if (firstInRow) {
 			nextHeight = (image.height - 1 - row) * image.width;
 		}
@@ -57,6 +58,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		nextHeight++;
 
 		// === Vertex Generation ===
+
 		if (firstInRow) {
 			column = 0;
 
