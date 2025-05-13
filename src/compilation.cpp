@@ -87,18 +87,14 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		nextIndex++;
 
 		// === Index Generation ===
-		bool invertTriangles = i % 2 == 0;
-
-		// Invert the invert every other row.
-		if (row % 2 == 0) {
-			invertTriangles = !invertTriangles;
-		}
 
 		// Build indices map for current pixel.
 		// - Adding the pixel index will shift the triangles along by 1 each time, creating the grid.
 		// - Adding the row will ensure the indices does not attempt to wrap one side of the plane to the other
 		// through skipping the triangles that would cause this.
-		if (invertTriangles) {
+
+		// Invert the triangles every other column and invert that every other row.
+		if (((i ^ row) & 1) == 0) {
 			model.indices.push_back(i + row + 0);
 			model.indices.push_back(i + row + (0 + (image.width + 1)));
 			model.indices.push_back(i + row + 1);
