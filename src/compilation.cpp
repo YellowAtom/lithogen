@@ -48,12 +48,15 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 								config->sliderGsPref[2] * image.data[rgbaIndex + 2];
 
 		// TODO: Implement "sliderGsPref[3]" to scale the alpha between inverted and not.
-		// TODO: WRONG, 1 is the THINNEST, 0 is the THICKEST. Reverse it.
-		// Fully transparent pixels are made thinnest and opaque is unmodified.
-		const float alphaScale = image.data[rgbaIndex + 3] / 255.0F;
 
-		// Turn the alpha adjusted grayscale value into a normalized float where 0 is thick and 1 is thin.
-		const float depth = grayScale * alphaScale / 255.0F;
+		// Normalise the gray scale value and flip the result for alpha processing.
+		float depth = 1 - grayScale / 255;
+
+		// Fully transparent pixels are made thinnest and opaque is unmodified.
+		depth *= image.data[rgbaIndex + 3] / 255.0F;
+
+		// Flip the depth again to return values to the expected output.
+		depth = 1 - depth;
 
 		nextHeight++;
 
