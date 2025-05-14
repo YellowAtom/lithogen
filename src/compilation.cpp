@@ -29,10 +29,10 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	// Keeps track of the vertex count, needed as last row is inserted parallel.
 	size_t nextIndex = 0;
 
-	for (int i = 0; i < pixelCount; i++) {
-		const int row = i / image.width;
+	for (int pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
+		const int row = pixelIndex / image.width;
 		const bool lastRow = row == image.height - 1;
-		const bool firstInRow = i - row * image.width == 0;
+		const bool firstInRow = pixelIndex - row * image.width == 0;
 
 		// === Image Processing ===
 
@@ -94,22 +94,22 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		// through skipping the triangles that would cause this.
 
 		// Invert the triangles every other column and invert that every other row.
-		if (((i ^ row) & 1) == 0) {
-			model.indices.push_back(i + row + 0);
-			model.indices.push_back(i + row + (0 + (image.width + 1)));
-			model.indices.push_back(i + row + 1);
+		if (((pixelIndex ^ row) & 1) == 0) {
+			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 1);
 
-			model.indices.push_back(i + row + 1);
-			model.indices.push_back(i + row + (0 + (image.width + 1)));
-			model.indices.push_back(i + row + (1 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 1);
+			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 		} else {
-			model.indices.push_back(i + row + 1);
-			model.indices.push_back(i + row + 0);
-			model.indices.push_back(i + row + (1 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 1);
+			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 
-			model.indices.push_back(i + row + 0);
-			model.indices.push_back(i + row + (0 + (image.width + 1)));
-			model.indices.push_back(i + row + (1 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 		}
 
 		column++;
