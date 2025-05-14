@@ -66,22 +66,22 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			column = 0;
 
 			model.vertices[nextIndex] =
-			    Vertex(glm::vec3(column * pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
+				Vertex(glm::vec3(column * pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 			if (lastRow) {
 				model.vertices[nextIndex + (image.width + 1)] =
-				    Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+					Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 			}
 
 			nextIndex++;
 		}
 
 		model.vertices[nextIndex] =
-		    Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
+			Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 		if (lastRow) {
 			model.vertices[nextIndex + (image.width + 1)] = Vertex(
-			    glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+				glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 		}
 
 		nextIndex++;

@@ -18,7 +18,7 @@ nfdu8char_t* FileSelectImage(GLFWwindow* window) {
 	NFD_Init();
 
 	constexpr nfdu8filteritem_t filters[1] = {
-	    {"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
+		{"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
 	};
 
 	nfdopendialogu8args_t args = {};
@@ -104,7 +104,7 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	glfwGetWindowSize(window, &width, &height);
 
 	data->cursorWithinViewport =
-	    width - x < data->render->GetViewportWidth() && height - y < data->render->GetViewportHeight();
+		width - x < data->render->GetViewportWidth() && height - y < data->render->GetViewportHeight();
 
 	// Is left mouse down and is the cursor within the viewport.
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && data->cursorWithinViewport) {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 
 	// Initialize the single GLFW3 window used by this application, this also initializes an OpenGL context.
 	GLFWwindow* mainWindow =
-	    glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LithoGen", nullptr, nullptr);
+		glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LithoGen", nullptr, nullptr);
 
 	if (mainWindow == nullptr) {
 		std::cout << "Failed to create GLFW window!\n";

@@ -52,4 +52,4 @@ SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 TabWidth: 4
-UseTab: ForIndentation
+UseTab: AlignWithSpaces
