@@ -44,8 +44,8 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		// Calculate the grayscale out of the RGB values, weighted by the config.
 		const float grayScale = config->sliderGsPref[0] * image.data[rgbaIndex] +
-								config->sliderGsPref[1] * image.data[rgbaIndex + 1] +
-								config->sliderGsPref[2] * image.data[rgbaIndex + 2];
+		                        config->sliderGsPref[1] * image.data[rgbaIndex + 1] +
+		                        config->sliderGsPref[2] * image.data[rgbaIndex + 2];
 
 		// TODO: Implement "sliderGsPref[3]" to scale the alpha between inverted and not.
 
@@ -66,22 +66,22 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			column = 0;
 
 			model.vertices[nextIndex] =
-				Vertex(glm::vec3(column * pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
+			    Vertex(glm::vec3(column * pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 			if (lastRow) {
 				model.vertices[nextIndex + (image.width + 1)] =
-					Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+				    Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 			}
 
 			nextIndex++;
 		}
 
 		model.vertices[nextIndex] =
-			Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
+		    Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 		if (lastRow) {
 			model.vertices[nextIndex + (image.width + 1)] = Vertex(
-				glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+			    glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 		}
 
 		nextIndex++;
@@ -132,13 +132,13 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 	// Debug Vertex Positions.
 	/* for (int i = 0; i < model.vertices.size(); i++) {
-		std::cout << i << " = " << model.vertices[i].position.x << ", " << model.vertices[i].position.y << '\n';
+	    std::cout << i << " = " << model.vertices[i].position.x << ", " << model.vertices[i].position.y << '\n';
 	}
 
 	std::cout << "==============\n";
 
 	// Debug Index List.
 	for (int i = 0; i < model.indices.size(); i++) {
-		std::cout << i / 6 + 1 << " = " << model.indices[i] << '\n';
+	    std::cout << i / 6 + 1 << " = " << model.indices[i] << '\n';
 	} */
 }

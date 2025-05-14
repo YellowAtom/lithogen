@@ -18,7 +18,7 @@ nfdu8char_t* FileSelectImage(GLFWwindow* window) {
 	NFD_Init();
 
 	constexpr nfdu8filteritem_t filters[1] = {
-		{"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
+	    {"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
 	};
 
 	nfdopendialogu8args_t args = {};
@@ -104,7 +104,7 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	glfwGetWindowSize(window, &width, &height);
 
 	data->cursorWithinViewport =
-		width - x < data->render->GetViewportWidth() && height - y < data->render->GetViewportHeight();
+	    width - x < data->render->GetViewportWidth() && height - y < data->render->GetViewportHeight();
 
 	// Is left mouse down and is the cursor within the viewport.
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && data->cursorWithinViewport) {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 
 	// Initialize the single GLFW3 window used by this application, this also initializes an OpenGL context.
 	GLFWwindow* mainWindow =
-		glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LithoGen", nullptr, nullptr);
+	    glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "LithoGen", nullptr, nullptr);
 
 	if (mainWindow == nullptr) {
 		std::cout << "Failed to create GLFW window!\n";
@@ -279,8 +279,8 @@ int main(int argc, char* argv[]) {
 		ImGui::SetNextWindowSize(ImVec2(GUI_SIDEPANEL_WIDTH, height - GUI_MENUBAR_HEIGHT));
 
 		ImGui::Begin("SidePanel", nullptr,
-					 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-						 ImGuiWindowFlags_NoTitleBar);
+		             ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+		                 ImGuiWindowFlags_NoTitleBar);
 
 		if (image.data == nullptr) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -292,15 +292,15 @@ int main(int argc, char* argv[]) {
 		// TODO: Implement difference kinds of grayscale processing. Currently we are only doing luminance.
 		ImGui::Text("Grayscale Preference");
 		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-						   ImGuiSliderFlags_AlwaysClamp);
+		                   ImGuiSliderFlags_AlwaysClamp);
 		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-						   ImGuiSliderFlags_AlwaysClamp);
+		                   ImGuiSliderFlags_AlwaysClamp);
 		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-						   ImGuiSliderFlags_AlwaysClamp);
+		                   ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::Text("Alpha Thickness");
 		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-						   ImGuiSliderFlags_AlwaysClamp);
+		                   ImGuiSliderFlags_AlwaysClamp);
 
 		ImGui::SeparatorText("Mesh Configuration");
 
@@ -308,26 +308,26 @@ int main(int argc, char* argv[]) {
 
 		// TODO: The forced ratio does not clamp.
 		if (ImGui::SliderFloat("Width", &config->sliderWidth, SLIDER_WIDTH_MIN, SLIDER_WIDTH_MAX,
-							   SLIDER_FLOAT_FORMAT_MM)) {
+		                       SLIDER_FLOAT_FORMAT_MM)) {
 			config->sliderHeight = config->sliderWidth * image.aspectRatioH / image.aspectRatioW;
 		}
 
 		if (ImGui::SliderFloat("Height", &config->sliderHeight, SLIDER_HEIGHT_MIN, SLIDER_HEIGHT_MAX,
-							   SLIDER_FLOAT_FORMAT_MM)) {
+		                       SLIDER_FLOAT_FORMAT_MM)) {
 			config->sliderWidth = config->sliderHeight * image.aspectRatioW / image.aspectRatioH;
 		}
 
 		ImGui::Text("Thickness");
 
 		if (ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX,
-							   SLIDER_FLOAT_FORMAT_MM)) {
+		                       SLIDER_FLOAT_FORMAT_MM)) {
 			if (config->sliderThickMin > config->sliderThickMax) {
 				config->sliderThickMax = config->sliderThickMin;
 			}
 		}
 
 		if (ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX,
-							   SLIDER_FLOAT_FORMAT_MM)) {
+		                       SLIDER_FLOAT_FORMAT_MM)) {
 			if (config->sliderThickMax < config->sliderThickMin) {
 				config->sliderThickMin = config->sliderThickMax;
 			}
@@ -372,8 +372,8 @@ int main(int argc, char* argv[]) {
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0F, 0.0F));
 
 			ImGui::Begin("Source Preview", nullptr,
-						 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar |
-							 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
+			             ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar |
+			                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
 			ImGui::Image(image.texture, ImVec2(previewWidth, previewHeight));
 			ImGui::End();
 
