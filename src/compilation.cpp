@@ -4,6 +4,26 @@
 #include <iostream>
 #include <vector>
 
+float GetDepth(const int index, const Config* config, const Image& image) {
+	const int rgbaIndex = index * 4;
+
+	// Calculate the grayscale out of the RGB values, weighted by the config.
+	const float grayScale = config->sliderGsPref[0] * image.data[rgbaIndex] +
+	                        config->sliderGsPref[1] * image.data[rgbaIndex + 1] +
+	                        config->sliderGsPref[2] * image.data[rgbaIndex + 2];
+
+	// TODO: Implement alpha slider (config->sliderGsPref[3]) to scale the alpha between inverted and not.
+
+	// Normalise the gray scale value and flip the result for alpha processing.
+	float depth = 1 - grayScale / 255;
+
+	// Fully transparent pixels are made thinnest and opaque is unmodified.
+	depth *= image.data[rgbaIndex + 3] / 255.0F;
+
+	// Flip the depth again to return values to the expected output and return it.
+	return 1 - depth;
+}
+
 void CompileModel(Model& model, const Config* config, const Image& image) {
 	const auto startTime = std::chrono::high_resolution_clock::now();
 	const int pixelCount = image.width * image.height;
@@ -24,8 +44,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 	// Stores the current column the pixel belongs to.
 	int column = 0;
-	// Pixels must be read backwards as the mesh is generated from the bottom left. TODO: Maybe this could be avoided.
-	int nextHeight = 0;
+
 	// Keeps track of the vertex count, needed as last row is inserted parallel.
 	size_t nextIndex = 0;
 
@@ -36,29 +55,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		// === Image Processing ===
 
-		if (firstInRow) {
-			nextHeight = (image.height - 1 - row) * image.width;
-		}
-
-		const int rgbaIndex = nextHeight * 4;
-
-		// Calculate the grayscale out of the RGB values, weighted by the config.
-		const float grayScale = config->sliderGsPref[0] * image.data[rgbaIndex] +
-		                        config->sliderGsPref[1] * image.data[rgbaIndex + 1] +
-		                        config->sliderGsPref[2] * image.data[rgbaIndex + 2];
-
-		// TODO: Implement "sliderGsPref[3]" to scale the alpha between inverted and not.
-
-		// Normalise the gray scale value and flip the result for alpha processing.
-		float depth = 1 - grayScale / 255;
-
-		// Fully transparent pixels are made thinnest and opaque is unmodified.
-		depth *= image.data[rgbaIndex + 3] / 255.0F;
-
-		// Flip the depth again to return values to the expected output.
-		depth = 1 - depth;
-
-		nextHeight++;
+		const float depth = GetDepth(pixelIndex, config, image);
 
 		// === Vertex Generation ===
 
@@ -66,22 +63,23 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			column = 0;
 
 			model.vertices[nextIndex] =
-				Vertex(glm::vec3(column * pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
+				Vertex(glm::vec3(column * pixelSize, -row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 			if (lastRow) {
 				model.vertices[nextIndex + (image.width + 1)] =
-					Vertex(glm::vec3(column * pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+					Vertex(glm::vec3(column * pixelSize, (-row - 1) * pixelSize, depth * depthScale), glm::vec3(depth));
 			}
 
 			nextIndex++;
 		}
 
 		model.vertices[nextIndex] =
-			Vertex(glm::vec3(column * pixelSize + pixelSize, row * pixelSize, depth * depthScale), glm::vec3(depth));
+			Vertex(glm::vec3(column * pixelSize + pixelSize, -row * pixelSize, depth * depthScale), glm::vec3(depth));
 
 		if (lastRow) {
-			model.vertices[nextIndex + (image.width + 1)] = Vertex(
-				glm::vec3(column * pixelSize + pixelSize, (row + 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+			model.vertices[nextIndex + (image.width + 1)] =
+				Vertex(glm::vec3(column * pixelSize + pixelSize, (-row - 1) * pixelSize, depth * depthScale),
+			           glm::vec3(depth));
 		}
 
 		nextIndex++;
@@ -96,20 +94,20 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		// Invert the triangles every other column and invert that every other row.
 		if (((pixelIndex ^ row) & 1) == 0) {
 			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
-			model.indices.push_back(pixelIndex + row + 1);
 
 			model.indices.push_back(pixelIndex + row + 1);
-			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 0);
 		} else {
-			model.indices.push_back(pixelIndex + row + 1);
-			model.indices.push_back(pixelIndex + row + 0);
 			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
-
-			model.indices.push_back(pixelIndex + row + 0);
 			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
-			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 1);
+
+			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(pixelIndex + row + 1);
 		}
 
 		column++;
