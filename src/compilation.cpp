@@ -1,7 +1,7 @@
 #include "compilation.h"
 #include <chrono>
-#include <cstdint>
 #include <iostream>
+#include <thread>
 #include <vector>
 
 float GetDepth(const int index, const Config* config, const Image& image) {
@@ -42,6 +42,11 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	constexpr float pixelSize = 0.01F; // Millimeters seems to be unit x2.
 	constexpr float depthScale = 0.05F;
 
+	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work.
+	// const unsigned int numThreads = std::thread::hardware_concurrency();
+	// std::vector<std::thread> threads;
+	// const int chunkSize = pixelCount / numThreads;
+
 	// Stores the current column the pixel belongs to.
 	int column = 0;
 
@@ -50,8 +55,12 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 	for (int pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
 		const int row = pixelIndex / image.width;
+
+		// Gather the current state of the pixel.
+		const bool firstRow = row == 0;
 		const bool lastRow = row == image.height - 1;
 		const bool firstInRow = pixelIndex - row * image.width == 0;
+		const bool lastInRow = pixelIndex - row * image.width == image.width - 1;
 
 		// === Image Processing ===
 
@@ -62,9 +71,16 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		if (firstInRow) {
 			column = 0;
 
-			model.vertices[nextIndex] =
-				Vertex(glm::vec3(column * pixelSize, -row * pixelSize, depth * depthScale), glm::vec3(depth));
+			// Calculate the average for left side edge vertices, leaving the top left and bottom right points
+			// unmodified.
+			const float firstDepth =
+				!firstRow ? (depth + GetDepth(pixelIndex - image.width, config, image)) / 2 : depth;
 
+			// The first vertex of every row.
+			model.vertices[nextIndex] =
+				Vertex(glm::vec3(column * pixelSize, -row * pixelSize, firstDepth * depthScale), glm::vec3(firstDepth));
+
+			// Last row includes creating the final row in parallel.
 			if (lastRow) {
 				model.vertices[nextIndex + (image.width + 1)] =
 					Vertex(glm::vec3(column * pixelSize, (-row - 1) * pixelSize, depth * depthScale), glm::vec3(depth));
@@ -73,13 +89,35 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			nextIndex++;
 		}
 
-		model.vertices[nextIndex] =
-			Vertex(glm::vec3(column * pixelSize + pixelSize, -row * pixelSize, depth * depthScale), glm::vec3(depth));
+		float secondDepth = 0;
 
+		if (lastInRow && firstRow) {
+			secondDepth = depth; // For the top right pixel.
+		} else if (firstRow) {
+			secondDepth = (depth + GetDepth(pixelIndex + 1, config, image)) / 2; // For normal top pixels.
+		} else if (lastInRow) {
+			secondDepth = (depth + GetDepth(pixelIndex - image.width, config, image)) / 2; // For normal right pixels.
+		} else {
+			// For normal pixels.
+			secondDepth =
+				(depth + GetDepth(pixelIndex + 1, config, image) + GetDepth(pixelIndex - image.width, config, image) +
+			     GetDepth(pixelIndex - image.width + 1, config, image)) /
+				4;
+		}
+
+		// The most common type of vertex.
+		model.vertices[nextIndex] =
+			Vertex(glm::vec3(column * pixelSize + pixelSize, -row * pixelSize, secondDepth * depthScale),
+		           glm::vec3(secondDepth));
+
+		// Last row includes creating the final row in parallel.
 		if (lastRow) {
+			// Calculate the average for the last row pixels, leaving the bottom right pixel alone.
+			const float thirdDepth = !lastInRow ? (depth + GetDepth(pixelIndex + 1, config, image)) / 2 : depth;
+
 			model.vertices[nextIndex + (image.width + 1)] =
-				Vertex(glm::vec3(column * pixelSize + pixelSize, (-row - 1) * pixelSize, depth * depthScale),
-			           glm::vec3(depth));
+				Vertex(glm::vec3(column * pixelSize + pixelSize, (-row - 1) * pixelSize, thirdDepth * depthScale),
+			           glm::vec3(thirdDepth));
 		}
 
 		nextIndex++;
