@@ -184,8 +184,8 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 struct CustomMeshProvider : microstl::Writer::Provider {
 	const Model& model;
-	bool ascii = false;
-	bool clearNormals = false;
+	bool ascii = false; // Write out the STL in ASCII text format as opposed to binary.
+	bool clearNormals = true; // Ignore the n value below.
 
 	CustomMeshProvider(const Model& m) : model(m) {}
 
@@ -201,21 +201,17 @@ struct CustomMeshProvider : microstl::Writer::Provider {
 	}
 
 	void getFacet(size_t index, float v1[3], float v2[3], float v3[3], float n[3]) override {
-		index = index + 3;
+		index *= 3;
 
-		v1[0] = model.vertices[model.indices[index - 2]].position.x;
-		v1[1] = model.vertices[model.indices[index - 2]].position.y;
-		v1[2] = model.vertices[model.indices[index - 2]].position.z;
-		v2[0] = model.vertices[model.indices[index - 1]].position.x;
-		v2[1] = model.vertices[model.indices[index - 1]].position.y;
-		v2[2] = model.vertices[model.indices[index - 1]].position.z;
-		v3[0] = model.vertices[model.indices[index]].position.x;
-		v3[1] = model.vertices[model.indices[index]].position.y;
-		v3[2] = model.vertices[model.indices[index]].position.z;
-
-		n[0] = 0;
-		n[1] = 0;
-		n[2] = 0;
+		v1[0] = model.vertices[model.indices[index]].position.x;
+		v1[1] = model.vertices[model.indices[index]].position.y;
+		v1[2] = model.vertices[model.indices[index]].position.z;
+		v2[0] = model.vertices[model.indices[index + 1]].position.x;
+		v2[1] = model.vertices[model.indices[index + 1]].position.y;
+		v2[2] = model.vertices[model.indices[index + 1]].position.z;
+		v3[0] = model.vertices[model.indices[index + 2]].position.x;
+		v3[1] = model.vertices[model.indices[index + 2]].position.y;
+		v3[2] = model.vertices[model.indices[index + 2]].position.z;
 	}
 };
 
