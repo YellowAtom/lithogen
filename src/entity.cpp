@@ -150,7 +150,6 @@ void Entity::Draw(glm::mat4 mvp) const {
 	// Bind the VAO referencing the vertex and indices buffers.
 	glBindVertexArray(m_vao);
 
-	// TODO: FUCKKK. You did this!!! Need to make this dynamic.
 	// Draw the given data to the screen.
 	glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, nullptr);
 

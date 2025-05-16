@@ -14,30 +14,6 @@
 #include "image.h"
 #include "render.h"
 
-nfdu8char_t* FileSelectImage(GLFWwindow* window) {
-	NFD_Init();
-
-	constexpr nfdu8filteritem_t filters[1] = {
-		{"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
-	};
-
-	nfdopendialogu8args_t args = {};
-	args.filterList = filters;
-	args.filterCount = 1;
-
-	NFD_GetNativeWindowFromGLFWWindow(window, &args.parentWindow);
-
-	nfdu8char_t* outPath = nullptr;
-	const nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
-
-	if (result == NFD_ERROR) {
-		std::cout << "Error: " << NFD_GetError() << '\n';
-	}
-
-	NFD_Quit();
-	return result == NFD_CANCEL ? nullptr : outPath;
-}
-
 // A simple function to send the image data to the gpu and return the pointer.
 GLuint LoadTexture(const stbi_uc* image, const int width, const int height) {
 	GLuint imageTexture = 0;
@@ -51,6 +27,84 @@ GLuint LoadTexture(const stbi_uc* image, const int width, const int height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
 	return imageTexture;
+}
+
+void ImportButton(GLFWwindow* window, Image& image, Config* config) {
+	constexpr nfdu8filteritem_t filters[1] = {
+		{"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
+	};
+
+	nfdopendialogu8args_t args = {};
+	args.filterList = filters;
+	args.filterCount = 1;
+
+	NFD_GetNativeWindowFromGLFWWindow(window, &args.parentWindow);
+
+	nfdu8char_t* outPath = nullptr;
+
+	if (const nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args); result != NFD_OKAY) {
+		if (result == NFD_ERROR) {
+			std::cout << "Error: " << NFD_GetError() << '\n';
+		}
+
+		return;
+	}
+
+	if (image.data != nullptr) {
+		stbi_image_free(image.data);
+	}
+
+	// Load the image from storage, it will automatically process any of the supported formats.
+	image.data = stbi_load(outPath, &image.width, &image.height, nullptr, 4);
+
+	if (image.data == nullptr) {
+		std::cout << "Failed to load image!\n";
+		return;
+	}
+
+	// Calculate the information required to gather aspect ratio based sizing.
+	const int aspectGcd = std::gcd(image.width, image.height);
+	image.aspectRatioW = image.width / aspectGcd;
+	image.aspectRatioH = image.height / aspectGcd;
+
+	// Ensure the default width is the correct aspect ratio and reset the size when a new image is
+	// loaded.
+	config->sliderHeight = 100.0F;
+	config->sliderWidth = 100.0F * image.aspectRatioW / image.aspectRatioH;
+
+	if (image.texture != 0) {
+		glDeleteTextures(1, &image.texture); // Ensure the previous image has been cleaned up.
+	}
+
+	// Send the image to the GPU for the renderer to preview.
+	image.texture = LoadTexture(image.data, image.width, image.height);
+	// Clear the file path from memory as we are done with it.
+	NFD_FreePathU8(outPath);
+}
+
+void ExportButton(GLFWwindow* window, const Model& model) {
+	if (model.indices.empty()) {
+		return;
+	}
+
+	nfdsavedialogu8args_t args = {};
+	args.filterCount = 0;
+	args.defaultName = "lithophane.stl";
+
+	NFD_GetNativeWindowFromGLFWWindow(window, &args.parentWindow);
+
+	nfdu8char_t* outPath = nullptr;
+
+	if (const nfdresult_t result = NFD_SaveDialogU8_With(&outPath, &args); result != NFD_OKAY) {
+		if (result == NFD_ERROR) {
+			std::cout << "Error: " << NFD_GetError() << '\n';
+		}
+
+		return;
+	}
+
+	WriteModel(outPath, model);
+	NFD_FreePathU8(outPath);
 }
 
 // GLFW callbacks.
@@ -130,6 +184,8 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	NFD_Init();
+
 	// The target OpenGL version (4.0).
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -192,8 +248,9 @@ int main(int argc, char* argv[]) {
 	// Make this object accessible from within any GLFW callback.
 	glfwSetWindowUserPointer(mainWindow, glfwUser);
 
-	// The currently mounted image.
+	// The currently mounted image and model.
 	Image image;
+	Model model;
 
 	while (glfwWindowShouldClose(mainWindow) == 0) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color and depth buffer to avoid any junk.
@@ -209,39 +266,10 @@ int main(int argc, char* argv[]) {
 		if (ImGui::BeginMainMenuBar()) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Import")) {
-					if (nfdu8char_t* result = FileSelectImage(mainWindow)) {
-						if (image.data != nullptr) {
-							stbi_image_free(image.data);
-						}
-
-						// Load the image from storage, it will automatically process any of the supported formats.
-						image.data = stbi_load(result, &image.width, &image.height, nullptr, 4);
-
-						// Calculate the information required to gather aspect ratio based sizing.
-						const int aspectGcd = std::gcd(image.width, image.height);
-						image.aspectRatioW = image.width / aspectGcd;
-						image.aspectRatioH = image.height / aspectGcd;
-
-						// Ensure the default width is the correct aspect ratio and reset the size when a new image is
-						// loaded.
-						config->sliderHeight = 100.0F;
-						config->sliderWidth = 100.0F * image.aspectRatioW / image.aspectRatioH;
-
-						if (image.data == nullptr) {
-							std::cout << "Failed to load image!\n";
-						} else {
-							if (image.texture != 0) {
-								glDeleteTextures(1, &image.texture); // Ensure the previous image has been cleaned up.
-							}
-
-							// Send the image to the GPU for the renderer to preview.
-							image.texture = LoadTexture(image.data, image.width, image.height);
-							// Clear the file path from memory as we are done with it.
-							NFD_FreePathU8(result);
-						}
-					}
+					ImportButton(mainWindow, image, config);
 				}
 				if (ImGui::MenuItem("Export")) {
+					ExportButton(mainWindow, model);
 				}
 				if (ImGui::MenuItem("Quit", "Alt+F4")) {
 					glfwSetWindowShouldClose(mainWindow, GL_TRUE);
@@ -335,7 +363,6 @@ int main(int argc, char* argv[]) {
 
 		ImGui::Spacing();
 		if (ImGui::Button("Compile")) {
-			Model model;
 			CompileModel(model, config, image);
 			render->entity.LoadModel(model);
 
@@ -401,6 +428,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup
 	glfwTerminate();
+	NFD_Quit();
 
 	return 0;
 }

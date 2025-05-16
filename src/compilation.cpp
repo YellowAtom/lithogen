@@ -1,6 +1,7 @@
 #include "compilation.h"
 #include <chrono>
 #include <iostream>
+#include <microstl.h>
 #include <thread>
 #include <vector>
 
@@ -42,7 +43,9 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	constexpr float pixelSize = 0.01F; // Millimeters seems to be unit x2.
 	constexpr float depthScale = 0.05F;
 
-	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work.
+	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work. And we cannot use
+	// push_back within index generation.
+
 	// const unsigned int numThreads = std::thread::hardware_concurrency();
 	// std::vector<std::thread> threads;
 	// const int chunkSize = pixelCount / numThreads;
@@ -177,4 +180,54 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	for (int i = 0; i < model.indices.size(); i++) {
 	    std::cout << i / 6 + 1 << " = " << model.indices[i] << '\n';
 	} */
+}
+
+struct CustomMeshProvider : microstl::Writer::Provider {
+	const Model& model;
+	bool ascii = false;
+	bool clearNormals = false;
+
+	CustomMeshProvider(const Model& m) : model(m) {}
+
+	bool asciiMode() override {
+		return ascii;
+	}
+	bool nullifyNormals() override {
+		return clearNormals;
+	}
+
+	size_t getFacetCount() override {
+		return model.indices.size() / 3;
+	}
+
+	void getFacet(size_t index, float v1[3], float v2[3], float v3[3], float n[3]) override {
+		index = index + 3;
+
+		v1[0] = model.vertices[model.indices[index - 2]].position.x;
+		v1[1] = model.vertices[model.indices[index - 2]].position.y;
+		v1[2] = model.vertices[model.indices[index - 2]].position.z;
+		v2[0] = model.vertices[model.indices[index - 1]].position.x;
+		v2[1] = model.vertices[model.indices[index - 1]].position.y;
+		v2[2] = model.vertices[model.indices[index - 1]].position.z;
+		v3[0] = model.vertices[model.indices[index]].position.x;
+		v3[1] = model.vertices[model.indices[index]].position.y;
+		v3[2] = model.vertices[model.indices[index]].position.z;
+
+		n[0] = 0;
+		n[1] = 0;
+		n[2] = 0;
+	}
+};
+
+void WriteModel(const char* filePath, const Model& model) {
+	using namespace microstl;
+
+	CustomMeshProvider provider(model);
+
+	if (const Result result = Writer::writeStlFile(filePath, provider); result != Result::Success) {
+		std::cerr << "Failed to write stl file!\n";
+	}
+
+	std::cout << "Written mesh to disk as \"" << filePath << "\".\n";
+	std::flush(std::cout);
 }
