@@ -23,5 +23,5 @@ private:
 
 	float m_fov = 90.0F;
 	float m_nearZ = 0.1F;
-	float m_farZ = 100.0F;
+	float m_farZ = 8000.0F; // Z Clip after 4000mm.
 };
