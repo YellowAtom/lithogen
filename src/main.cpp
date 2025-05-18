@@ -173,8 +173,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 void ScrollCallback(GLFWwindow* window, const double x, const double y) {
 	const auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
+	// Move 4mm per scroll.
 	if (data->render->entity.HasModel() && data->cursorWithinViewport) {
-		data->render->camera.Move(glm::vec3(0, 0, y / 10));
+		data->render->camera.Move(glm::vec3(0, 0, y * 4));
 	}
 }
 
