@@ -87,9 +87,14 @@ void ExportButton(GLFWwindow* window, const Model& model) {
 		return;
 	}
 
+	constexpr nfdu8filteritem_t filters[1] = {
+		{"Binary STL", "stl"},
+	};
+
 	nfdsavedialogu8args_t args = {};
-	args.filterCount = 0;
-	args.defaultName = "lithophane.stl";
+	args.filterList = filters;
+	args.filterCount = 1;
+	args.defaultName = "lithophane";
 
 	NFD_GetNativeWindowFromGLFWWindow(window, &args.parentWindow);
 
