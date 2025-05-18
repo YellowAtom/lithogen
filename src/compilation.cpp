@@ -39,13 +39,13 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	model.vertices.resize((image.width + 1) * (image.height + 1));
 	model.indices.reserve(pixelCount * 6);
 
-	// TODO: Add option to change pixel size.
-	constexpr float pixelSize = 0.01F; // Millimeters seems to be unit x2.
-	constexpr float depthScale = 0.05F;
+	// This will calculate the size of each pixel to create the target size. As aspect ratio is enforced, we only
+	// need to calculate the size of one side of the pixel as they will be equal.
+	const float pixelSize = config->sliderWidth / image.width;
+	const float depthScale = 5.0F;
 
 	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work. And we cannot use
 	// push_back within index generation.
-
 	// const unsigned int numThreads = std::thread::hardware_concurrency();
 	// std::vector<std::thread> threads;
 	// const int chunkSize = pixelCount / numThreads;
@@ -65,11 +65,9 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		const bool firstInRow = pixelIndex - row * image.width == 0;
 		const bool lastInRow = pixelIndex - row * image.width == image.width - 1;
 
-		// === Image Processing ===
+		// === Vertex Generation ===
 
 		const float depth = GetDepth(pixelIndex, config, image);
-
-		// === Vertex Generation ===
 
 		if (firstInRow) {
 			column = 0;
