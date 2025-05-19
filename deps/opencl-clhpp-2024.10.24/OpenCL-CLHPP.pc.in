@@ -1,8 +1,0 @@
-prefix=@PKGCONFIG_PREFIX@
-includedir=@OPENCLHPP_INCLUDEDIR_PC@
-
-Name: OpenCL-CLHPP
-Description: OpenCL API C++ bindings
-Requires: OpenCL-Headers
-Version: 3.0
-Cflags: -I${includedir}

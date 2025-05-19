@@ -12,10 +12,6 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Configuration for battery embed.
 set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
-# Configuration for Open CL.
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(ENABLE_OPENCL_LAYERS OFF CACHE BOOL "" FORCE)
-
 # Include project dependencies.
 add_subdirectory(deps/battery-embed-1.2.19)
 add_subdirectory(deps/glad-2.0.8)
@@ -24,9 +20,6 @@ add_subdirectory(deps/glm-1.0.1)
 add_subdirectory(deps/imgui-1.91.8)
 add_subdirectory(deps/microstl)
 add_subdirectory(deps/nativefiledialog-extended-1.2.1)
-add_subdirectory(deps/opencl-headers-2024.10.24)
-add_subdirectory(deps/opencl-icd-loader-2024.10.24)
-add_subdirectory(deps/opencl-clhpp-2024.10.24)
 add_subdirectory(deps/stb_image-2.30)
 
 # Automatically recursively gather all source files under src.
@@ -47,17 +40,16 @@ if (WIN32) # Windows
 
 	# Set the application type to windowed and force the use of the default entry point main().
 	#target_link_options(LithoGen_App PRIVATE "/subsystem:windows" PRIVATE "/entry:mainCRTStartup")
-elseif(UNIX AND NOT APPLE) # Linux
+elseif (UNIX AND NOT APPLE) # Linux
 	# Create the executable.
 	add_executable(LithoGen_App ${SOURCE_FILES})
-elseif(APPLE) # MacOS
+elseif (APPLE) # MacOS
 	# Create the executable.
 	add_executable(LithoGen_App ${SOURCE_FILES})
-endif()
+endif ()
 
-# CL_HPP_TARGET_OPENCL_VERSION - Set OpenCL version to 3.0.
 # GLFW_INCLUDE_NONE - Prevent a compatability issue between Glad and GLFW.
-target_compile_definitions(LithoGen_App PRIVATE CL_HPP_TARGET_OPENCL_VERSION=300 GLFW_INCLUDE_NONE)
+target_compile_definitions(LithoGen_App PRIVATE GLFW_INCLUDE_NONE)
 
 # Embed these files into the executable.
 b_embed(LithoGen_App res/shaders/vertex.glsl)
@@ -67,4 +59,4 @@ b_embed(LithoGen_App res/shaders/fragment.glsl)
 set_target_properties(LithoGen_App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(LithoGen_App PRIVATE glad glfw glm imgui microstl nfd OpenCL::Headers OpenCL::OpenCL OpenCL::HeadersCpp stb_image)
+target_link_libraries(LithoGen_App PRIVATE glad glfw glm imgui microstl nfd stb_image)
