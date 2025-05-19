@@ -29,8 +29,9 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	const auto startTime = std::chrono::high_resolution_clock::now();
 	const int pixelCount = image.width * image.height;
 
-	// TODO: Move vertices from resize() to reserve() if it is faster. This will require implementing the loop to only
-	// use emplace_back.
+	// Reset the model to blank before we begin editing. Maybe we can avoid allocated the model initially if we do it
+	// here, or avoid the double allocation some other way.
+	model = Model{};
 
 	// Pre-allocate the space to avoid dynamic memory overhead.
 	// - Each row and column of vertices is just the pixel count plus one, multiplied by each other with give the total
