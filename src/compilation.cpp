@@ -44,7 +44,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	// This will calculate the size of each pixel to create the target size. As aspect ratio is enforced, we only
 	// need to calculate the size of one side of the pixel as they will be equal.
 	const float pixelSize = config->sliderWidth / image.width;
-	const float depthMax = config->sliderThickMax / 2; // Translate from mm to units.
+	const float depthMax = config->sliderThickMax;
 
 	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work. And we cannot use
 	// push_back within index generation.
@@ -80,13 +80,13 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 				!firstRow ? (depth + GetDepth(pixelIndex - image.width, config, image)) / 2 : depth;
 
 			// The first vertex of every row.
-			model.vertices[nextIndex] = Vertex(glm::vec3(column * pixelSize, -row * pixelSize, firstDepth * depthMax),
-			                                   glm::vec3(1 - -firstDepth));
+			model.vertices[nextIndex] = Vertex(
+				glm::vec3(-(column * pixelSize), -row * pixelSize, firstDepth * depthMax), glm::vec3(1 - -firstDepth));
 
 			// Last row includes creating the final row in parallel.
 			if (lastRow) {
 				model.vertices[nextIndex + (image.width + 1)] = Vertex(
-					glm::vec3(column * pixelSize, (-row - 1) * pixelSize, depth * depthMax), glm::vec3(1 - -depth));
+					glm::vec3(-(column * pixelSize), (-row - 1) * pixelSize, depth * depthMax), glm::vec3(1 - -depth));
 			}
 
 			nextIndex++;
@@ -110,7 +110,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		// The most common type of vertex.
 		model.vertices[nextIndex] =
-			Vertex(glm::vec3(column * pixelSize + pixelSize, -row * pixelSize, secondDepth * depthMax),
+			Vertex(glm::vec3(-(column * pixelSize + pixelSize), -row * pixelSize, secondDepth * depthMax),
 		           glm::vec3(1 - -secondDepth));
 
 		// Last row includes creating the final row in parallel.
@@ -119,7 +119,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			const float thirdDepth = !lastInRow ? (depth + GetDepth(pixelIndex + 1, config, image)) / 2 : depth;
 
 			model.vertices[nextIndex + (image.width + 1)] =
-				Vertex(glm::vec3(column * pixelSize + pixelSize, (-row - 1) * pixelSize, thirdDepth * depthMax),
+				Vertex(glm::vec3(-(column * pixelSize + pixelSize), (-row - 1) * pixelSize, thirdDepth * depthMax),
 			           glm::vec3(1 - -thirdDepth));
 		}
 
@@ -157,14 +157,14 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	// === Back Panel Creation ===
 
 	const size_t frontVertCount = model.vertices.size() - 4;
-	const float depthMin = config->sliderThickMin / 2; // Translate from mm to units.
+	const float depthMin = config->sliderThickMin;
 
 	// Create a vertex at each of the four corners one unit behind, this will hold our back panel.
 	model.vertices[frontVertCount] = Vertex(glm::vec3(0, 0, depthMin), glm::vec3(1));
-	model.vertices[frontVertCount + 1] = Vertex(glm::vec3(image.width * pixelSize, 0, depthMin), glm::vec3(1));
+	model.vertices[frontVertCount + 1] = Vertex(glm::vec3(-(image.width * pixelSize), 0, depthMin), glm::vec3(1));
 	model.vertices[frontVertCount + 2] = Vertex(glm::vec3(0, -image.height * pixelSize, depthMin), glm::vec3(1));
 	model.vertices[frontVertCount + 3] =
-		Vertex(glm::vec3(image.width * pixelSize, -image.height * pixelSize, depthMin), glm::vec3(1));
+		Vertex(glm::vec3(-(image.width * pixelSize), -image.height * pixelSize, depthMin), glm::vec3(1));
 
 	model.indices.push_back(frontVertCount + 3);
 	model.indices.push_back(frontVertCount + 1);
