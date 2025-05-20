@@ -21,8 +21,8 @@ float GetDepth(const int index, const Config* config, const Image& image) {
 	// Fully transparent pixels are made thinnest and opaque is unmodified.
 	depth *= image.data[rgbaIndex + 3] / 255.0F;
 
-	// Flip the depth again to return values to the expected output and return it.
-	return 1 - depth;
+	// Make the output negative to ensure the mesh builds in the correct direction.
+	return -depth;
 }
 
 void CompileModel(Model& model, const Config* config, const Image& image) {
@@ -34,16 +34,17 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	model = Model{};
 
 	// Pre-allocate the space to avoid dynamic memory overhead.
-	// - Each row and column of vertices is just the pixel count plus one, multiplied by each other with give the total
-	// amount.
-	// - Indices prediction is simply 6 per pixel as each pixel is two triangles.
-	model.vertices.resize((image.width + 1) * (image.height + 1));
-	model.indices.reserve(pixelCount * 6);
+	// - Each row and column of vertices is just the pixel count plus 1, multiplied by each other with give the total
+	// amount, plus 4 for the back panel.
+	// - Indices prediction is simply 6 per pixel as each pixel is two triangles. 18 indices are given to the back-panel
+	// and every edge pixel gets 9 indices to connect to it.
+	model.vertices.resize((image.width + 1) * (image.height + 1) + 4);
+	model.indices.reserve(pixelCount * 6 + 18 + (image.height * 18) + (image.width * 18));
 
 	// This will calculate the size of each pixel to create the target size. As aspect ratio is enforced, we only
 	// need to calculate the size of one side of the pixel as they will be equal.
 	const float pixelSize = config->sliderWidth / image.width;
-	const float depthScale = 5.0F;
+	const float depthMax = config->sliderThickMax / 2; // Translate from mm to units.
 
 	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work. And we cannot use
 	// push_back within index generation.
@@ -79,13 +80,13 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 				!firstRow ? (depth + GetDepth(pixelIndex - image.width, config, image)) / 2 : depth;
 
 			// The first vertex of every row.
-			model.vertices[nextIndex] =
-				Vertex(glm::vec3(column * pixelSize, -row * pixelSize, firstDepth * depthScale), glm::vec3(firstDepth));
+			model.vertices[nextIndex] = Vertex(glm::vec3(column * pixelSize, -row * pixelSize, firstDepth * depthMax),
+			                                   glm::vec3(1 - -firstDepth));
 
 			// Last row includes creating the final row in parallel.
 			if (lastRow) {
-				model.vertices[nextIndex + (image.width + 1)] =
-					Vertex(glm::vec3(column * pixelSize, (-row - 1) * pixelSize, depth * depthScale), glm::vec3(depth));
+				model.vertices[nextIndex + (image.width + 1)] = Vertex(
+					glm::vec3(column * pixelSize, (-row - 1) * pixelSize, depth * depthMax), glm::vec3(1 - -depth));
 			}
 
 			nextIndex++;
@@ -109,8 +110,8 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		// The most common type of vertex.
 		model.vertices[nextIndex] =
-			Vertex(glm::vec3(column * pixelSize + pixelSize, -row * pixelSize, secondDepth * depthScale),
-		           glm::vec3(secondDepth));
+			Vertex(glm::vec3(column * pixelSize + pixelSize, -row * pixelSize, secondDepth * depthMax),
+		           glm::vec3(1 - -secondDepth));
 
 		// Last row includes creating the final row in parallel.
 		if (lastRow) {
@@ -118,8 +119,8 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			const float thirdDepth = !lastInRow ? (depth + GetDepth(pixelIndex + 1, config, image)) / 2 : depth;
 
 			model.vertices[nextIndex + (image.width + 1)] =
-				Vertex(glm::vec3(column * pixelSize + pixelSize, (-row - 1) * pixelSize, thirdDepth * depthScale),
-			           glm::vec3(thirdDepth));
+				Vertex(glm::vec3(column * pixelSize + pixelSize, (-row - 1) * pixelSize, thirdDepth * depthMax),
+			           glm::vec3(1 - -thirdDepth));
 		}
 
 		nextIndex++;
@@ -152,6 +153,26 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		column++;
 	}
+
+	// === Back Panel Creation ===
+
+	const size_t frontVertCount = model.vertices.size() - 4;
+	const float depthMin = config->sliderThickMin / 2; // Translate from mm to units.
+
+	// Create a vertex at each of the four corners one unit behind, this will hold our back panel.
+	model.vertices[frontVertCount] = Vertex(glm::vec3(0, 0, depthMin), glm::vec3(1));
+	model.vertices[frontVertCount + 1] = Vertex(glm::vec3(image.width * pixelSize, 0, depthMin), glm::vec3(1));
+	model.vertices[frontVertCount + 2] = Vertex(glm::vec3(0, -image.height * pixelSize, depthMin), glm::vec3(1));
+	model.vertices[frontVertCount + 3] =
+		Vertex(glm::vec3(image.width * pixelSize, -image.height * pixelSize, depthMin), glm::vec3(1));
+
+	model.indices.push_back(frontVertCount + 3);
+	model.indices.push_back(frontVertCount + 1);
+	model.indices.push_back(frontVertCount);
+
+	model.indices.push_back(frontVertCount);
+	model.indices.push_back(frontVertCount + 2);
+	model.indices.push_back(frontVertCount + 3);
 
 	// TODO: This works but it sucks.
 	// Acquire centre offset to centre the mesh in the view port later and ensure it is still accurate if there is an

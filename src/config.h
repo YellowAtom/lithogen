@@ -22,8 +22,8 @@ struct Config {
 	// Side Panel
 	float sliderWidth = 100.0F;
 	float sliderHeight = 100.0F;
-	float sliderThickMin = 0.001F;
-	float sliderThickMax = 20.0F;
+	float sliderThickMin = 0.8F;
+	float sliderThickMax = 3.2F;
 	float sliderGsPref[4] = {0.3F, 0.59F, 0.11F, 0.0F};
 
 	// Backend
