@@ -334,9 +334,9 @@ int main(int argc, char* argv[]) {
 		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
 		                   ImGuiSliderFlags_AlwaysClamp);
 
-		ImGui::Text("Alpha Thickness");
+		/* ImGui::Text("Alpha Thickness");
 		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-		                   ImGuiSliderFlags_AlwaysClamp);
+		                   ImGuiSliderFlags_AlwaysClamp); */
 
 		ImGui::SeparatorText("Mesh Configuration");
 
