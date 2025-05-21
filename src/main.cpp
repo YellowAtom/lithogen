@@ -1,4 +1,5 @@
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <glad/gl.h>
@@ -137,7 +138,7 @@ void KeyCallback(GLFWwindow* window, const int key, const int scancode, const in
 	}
 
 	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-		data->render->entity.ResetRotation();
+		data->render->camera.ResetRotation();
 	} else if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 		data->config->drawWireframe = !data->config->drawWireframe;
 		data->render->UpdateWireframe();
@@ -167,8 +168,9 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 
 	// Is left mouse down and is the cursor within the viewport.
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GL_TRUE && data->cursorWithinViewport) {
-		// Apply the difference between the previous and current mouse location to the entity's rotation.
-		data->render->entity.Rotate(glm::vec3(-(y - previousY), x - previousX, 0));
+		// Apply the difference between the previous and current mouse location to the camera's rotation.
+		data->render->camera.RotateHorizontal((x - previousX) / 20);
+		data->render->camera.RotateVertical((y - previousY) / 20);
 	}
 
 	previousX = x;
@@ -180,7 +182,7 @@ void ScrollCallback(GLFWwindow* window, const double x, const double y) {
 
 	// Move 4mm per scroll.
 	if (data->render->entity.HasModel() && data->cursorWithinViewport) {
-		data->render->camera.Move(glm::vec3(0, 0, y * 4));
+		data->render->camera.Zoom(y * 4);
 	}
 }
 
@@ -289,8 +291,8 @@ int main(int argc, char* argv[]) {
 				if (ImGui::MenuItem("Wireframe Preview", "W", &config->drawWireframe)) {
 					render->UpdateWireframe();
 				}
-				if (ImGui::MenuItem("Reset Preview", "R")) {
-					render->entity.ResetRotation();
+				if (ImGui::MenuItem("Reset Preview Rotation", "R")) {
+					render->camera.ResetRotation();
 				}
 				ImGui::EndMenu();
 			}
@@ -355,25 +357,25 @@ int main(int argc, char* argv[]) {
 
 		if (ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX,
 		                       SLIDER_FLOAT_FORMAT_MM)) {
-			if (config->sliderThickMin > config->sliderThickMax) {
-				config->sliderThickMax = config->sliderThickMin;
-			}
+			config->sliderThickMax = std::max(config->sliderThickMin, config->sliderThickMax);
 		}
 
 		if (ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX,
 		                       SLIDER_FLOAT_FORMAT_MM)) {
-			if (config->sliderThickMax < config->sliderThickMin) {
-				config->sliderThickMin = config->sliderThickMax;
-			}
+			config->sliderThickMin = std::min(config->sliderThickMax, config->sliderThickMin);
 		}
 
 		ImGui::Spacing();
+
 		if (ImGui::Button("Compile")) {
 			CompileModel(model, config, image);
 			render->entity.LoadModel(model);
 
 			// Offset the position by the centre offset.
 			render->entity.SetPosition(-model.centerOffset);
+
+			// Adjust the zoom to focus on the mesh based on the size of it.
+			render->camera.SetZoom(std::max(config->sliderWidth, config->sliderHeight) / 1.5F);
 
 			// TODO: Add visual error if compile fails.
 		}

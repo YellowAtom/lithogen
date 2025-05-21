@@ -1,53 +1,59 @@
 #include "camera.h"
-#include <glm/trigonometric.hpp>
+#include <algorithm>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
+#include <numbers>
 
 void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {
-	const float tanHalfFOV = tanf(glm::radians(m_fov / 2));
-	const float d = 1.0F / tanHalfFOV;
+	// The projection matrix.
+	mvp *= glm::perspective(glm::radians(m_fov), aspectRatio, m_nearZ, m_farZ);
 
-	const float zRange = m_nearZ - m_farZ;
-	const float a = (-m_farZ - m_nearZ) / zRange;
-	const float b = 2.0F * m_farZ * m_nearZ / zRange;
+	const float cosinePolar = cos(m_polarAngle);
 
-	// clang-format off
+	// Calculate eye position.
+	const glm::vec3 eye(m_target.x + m_radius * cosinePolar * cos(m_azimuthAngle),
+	                    m_target.y + m_radius * sin(m_polarAngle),
+	                    m_target.z + m_radius * cosinePolar * sin(m_azimuthAngle));
 
-	// The projection matrix. calculated form aspect ratio, fov and clip planes.
-	mvp *= glm::mat4(
-		d / aspectRatio, 0.0F, 0.0F, 0.0F,
-		0.0F, d, 0.0F, 0.0F,
-		0.0F, 0.0F, a, 1.0F,
-		0.0F, 0.0F, b, 0.0F
-	);
-
-	const glm::mat4 cameraTranslation(
-		1.0F, 0.0F, 0.0F, 0.0F,
-		0.0F, 1.0F, 0.0F, 0.0F,
-		0.0F, 0.0F, 1.0F, 0.0F,
-		-m_position.x, -m_position.y, -m_position.z, 1.0F
-	);
-
-	const glm::vec3 n = normalize(m_target);
-	const glm::vec3 u = normalize(cross(m_up, n));
-	const glm::vec3 v = cross(n, u);
-
-	const glm::mat4 cameraRotation(
-		u.x, v.x, n.x, 0.0F,
-		u.y, v.y, n.y, 0.0F,
-		u.z, v.z, n.z, 0.0F,
-		0.0F, 0.0F, 0.0F, 1.0F
-	);
-
-	// clang-format on
-
-	mvp *= cameraTranslation * cameraRotation;
+	// The view matrix.
+	mvp *= glm::lookAt(eye, m_target, m_up);
 }
 
-void Camera::SetPosition(const glm::vec3& position) {
-	m_position = position;
+void Camera::RotateHorizontal(const float radians) {
+	m_azimuthAngle += radians;
+
+	// Keep azimuth angle within range <0..2PI) - it's not necessary, but can help in certain scenarios.
+	constexpr float fullCircle = 2.0F * std::numbers::pi;
+
+	m_azimuthAngle = fmodf(m_azimuthAngle, fullCircle);
+
+	if (m_azimuthAngle < 0.0F) {
+		m_azimuthAngle = fullCircle + m_azimuthAngle;
+	}
 }
 
-void Camera::Move(const glm::vec3& movement) {
-	m_position += movement;
+void Camera::RotateVertical(const float radians) {
+	m_polarAngle += radians;
+
+	// Check if the angle hasn't exceeded quarter of a circle to prevent flip, add a bit of epsilon like 0.001 radians
+	constexpr float polarCap = std::numbers::pi / 2.0F - 0.001F;
+
+	m_polarAngle = std::min(m_polarAngle, polarCap);
+	m_polarAngle = std::max(m_polarAngle, -polarCap);
+}
+
+void Camera::ResetRotation() {
+	m_azimuthAngle = m_defaultAzimuthAngle;
+	m_polarAngle = 0.0F;
+}
+
+void Camera::Zoom(const float amount) {
+	m_radius -= amount;
+	m_radius = std::max(m_radius, m_minRadius);
+}
+
+void Camera::SetZoom(const float amount) {
+	m_radius = amount;
 }
 
 void Camera::SetTargetPos(const glm::vec3& target) {
