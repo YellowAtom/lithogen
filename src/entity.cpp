@@ -4,7 +4,9 @@
 #include <climits>
 #include <cstring>
 #include <glad/gl.h>
-#include <glm/trigonometric.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 #include <iostream>
 #include "vertex.h"
 
@@ -95,54 +97,16 @@ Entity::Entity(const Model& model) {
 }
 
 void Entity::Draw(glm::mat4 mvp) const {
-	// clang-format off
-
-	// Apply scale to the matrix.
-	const glm::mat4 s(
-		m_scale.x, 0.0F, 0.0F, 0.0F,
-		0.0F, m_scale.y, 0.0F, 0.0F,
-		0.0F, 0.0F, m_scale.z, 0.0F,
-		0.0F, 0.0F, 0.0F, 1.0F
-	);
-
 	// Apply translation / position to the matrix.
-	const glm::mat4 t(
-		1.0F, 0.0F, 0.0F, 0.0F,
-		0.0F, 1.0F, 0.0F, 0.0F,
-		0.0F, 0.0F, 1.0F, 0.0F,
-		m_position.x, m_position.y, m_position.z, 1.0F
-	);
+	mvp = glm::translate(mvp, glm::vec3(m_position.x, m_position.y, m_position.z));
 
 	// Apply rotation to the matrix.
-	const float rotateX = glm::radians(m_rotation.x);
-	const float rotateY = glm::radians(m_rotation.y);
-	const float rotateZ = glm::radians(m_rotation.z);
+	mvp = glm::rotate(mvp, glm::radians(m_rotation.x), glm::vec3(1.0F, 0.0F, 0.0F));
+	mvp = glm::rotate(mvp, glm::radians(m_rotation.y), glm::vec3(0.0F, 1.0F, 0.0F));
+	mvp = glm::rotate(mvp, glm::radians(m_rotation.z), glm::vec3(0.0F, 0.0F, 1.0F));
 
-	const glm::mat4 rx(
-		1.0F, 0.0F, 0.0F, 0.0F,
-		0.0F, cosf(rotateX), sinf(rotateX), 0.0F,
-		0.0F, -sinf(rotateX), cosf(rotateX), 0.0F,
-		0.0F, 0.0F, 0.0F, 1.0F
-	);
-
-	const glm::mat4 ry(
-		cosf(rotateY), 0.0F, sinf(rotateY), 0.0F,
-		0.0F, 1.0F, 0.0F, 0.0F,
-		-sinf(rotateY), 0.0F, cosf(rotateY), 0.0F,
-		0.0F, 0.0F, 0.0F, 1.0F
-	);
-
-	const glm::mat4 rz(
-		cosf(rotateZ), 0.0F, sinf(rotateZ), 0.0F,
-		0.0F, 1.0F, 0.0F, 0.0F,
-		-sinf(rotateZ), 0.0F, cosf(rotateZ), 0.0F,
-		0.0F, 0.0F, 0.0F, 1.0F
-	);
-
-	// clang-format on
-
-	// Combine the matrices into the world matrix in the correct order.
-	mvp *= t * (rz * ry * rx) * s;
+	// Apply scale to the matrix.
+	mvp = glm::scale(mvp, glm::vec3(m_scale.x, m_scale.y, m_scale.z));
 
 	// Pass the completed matrix to the GPU to be applied in the shader to the vector position.
 	glUniformMatrix4fv(m_mvpLoc, 1, GL_FALSE, &mvp[0][0]);
