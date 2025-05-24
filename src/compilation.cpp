@@ -26,6 +26,9 @@ float GetDepth(const int index, const Config* config, const Image& image) {
 }
 
 void CompileModel(Model& model, const Config* config, const Image& image) {
+	std::cout << "Compiling mesh...\n";
+	std::flush(std::cout);
+
 	const auto startTime = std::chrono::high_resolution_clock::now();
 	const int pixelCount = image.width * image.height;
 
