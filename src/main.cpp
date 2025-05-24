@@ -32,7 +32,7 @@ GLuint LoadTexture(const stbi_uc* image, const int width, const int height) {
 
 void ImportButton(GLFWwindow* window, Image& image, Config* config) {
 	constexpr nfdu8filteritem_t filters[1] = {
-		{"Images", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
+		{"Image", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
 	};
 
 	nfdopendialogu8args_t args = {};
