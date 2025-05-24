@@ -38,22 +38,22 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 	// Pre-allocate the space to avoid dynamic memory overhead.
 	// - Each row and column of vertices is just the pixel count plus 1, multiplied by each other with give the total
-	// amount, plus 4 for the back panel.
-	// - Indices prediction is simply 6 per pixel as each pixel is two triangles. 18 indices are given to the back-panel
-	// and every edge pixel gets 9 indices to connect to it.
-	model.vertices.resize((image.width + 1) * (image.height + 1) + 4);
-	model.indices.reserve(pixelCount * 6 + 18 + (image.height * 18) + (image.width * 18));
+	// amount. This is then doubled to fit in the back panel.
+	// - Indices prediction is simply 6 per pixel as each pixel is two triangles. This is doubled for the back panel
+	// with an extra 6 for each edge pixel to connect them.
+
+	const size_t frontVertexCount = (image.width + 1) * (image.height + 1);
+	const size_t frontIndexCount = pixelCount * 6;
+
+	model.vertices.resize(frontVertexCount * 2);
+	model.indices.reserve(frontIndexCount * 2 + ((image.width + image.height) * 2) * 6);
 
 	// This will calculate the size of each pixel to create the target size. As aspect ratio is enforced, we only
 	// need to calculate the size of one side of the pixel as they will be equal.
 	const float pixelSize = config->sliderWidth / image.width;
-	const float depthMax = config->sliderThickMax;
 
-	// TODO: Finish this multi-threading. Column and nextIndex cannot be a thing for this to work. And we cannot use
-	// push_back within index generation.
-	// const unsigned int numThreads = std::thread::hardware_concurrency();
-	// std::vector<std::thread> threads;
-	// const int chunkSize = pixelCount / numThreads;
+	const float depthMax = config->sliderThickMax;
+	const float depthMin = config->sliderThickMin;
 
 	// Stores the current column the pixel belongs to.
 	int column = 0;
@@ -83,13 +83,19 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 				!firstRow ? (depth + GetDepth(pixelIndex - image.width, config, image)) / 2 : depth;
 
 			// The first vertex of every row.
-			model.vertices[nextIndex] = Vertex(
-				glm::vec3(-(column * pixelSize), -row * pixelSize, firstDepth * depthMax), glm::vec3(1 - -firstDepth));
+			const glm::vec3 firstVert(-(column * pixelSize), -row * pixelSize, firstDepth * depthMax);
+
+			model.vertices[nextIndex] = Vertex(firstVert, glm::vec3(1 - -firstDepth));
+			model.vertices[frontVertexCount + nextIndex] =
+				Vertex(glm::vec3(firstVert.x, firstVert.y, depthMin), glm::vec3(0));
 
 			// Last row includes creating the final row in parallel.
 			if (lastRow) {
-				model.vertices[nextIndex + (image.width + 1)] = Vertex(
-					glm::vec3(-(column * pixelSize), (-row - 1) * pixelSize, depth * depthMax), glm::vec3(1 - -depth));
+				const glm::vec3 secondVert(-(column * pixelSize), (-row - 1) * pixelSize, depth * depthMax);
+
+				model.vertices[nextIndex + (image.width + 1)] = Vertex(secondVert, glm::vec3(1 - -depth));
+				model.vertices[frontVertexCount + nextIndex + (image.width + 1)] =
+					Vertex(glm::vec3(secondVert.x, secondVert.y, depthMin), glm::vec3(0));
 			}
 
 			nextIndex++;
@@ -112,18 +118,23 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		}
 
 		// The most common type of vertex.
-		model.vertices[nextIndex] =
-			Vertex(glm::vec3(-(column * pixelSize + pixelSize), -row * pixelSize, secondDepth * depthMax),
-		           glm::vec3(1 - -secondDepth));
+		const glm::vec3 thirdVert(-(column * pixelSize + pixelSize), -row * pixelSize, secondDepth * depthMax);
+
+		model.vertices[nextIndex] = Vertex(thirdVert, glm::vec3(1 - -secondDepth));
+		model.vertices[frontVertexCount + nextIndex] =
+			Vertex(glm::vec3(thirdVert.x, thirdVert.y, depthMin), glm::vec3(0));
 
 		// Last row includes creating the final row in parallel.
 		if (lastRow) {
 			// Calculate the average for the last row pixels, leaving the bottom right pixel alone.
 			const float thirdDepth = !lastInRow ? (depth + GetDepth(pixelIndex + 1, config, image)) / 2 : depth;
 
-			model.vertices[nextIndex + (image.width + 1)] =
-				Vertex(glm::vec3(-(column * pixelSize + pixelSize), (-row - 1) * pixelSize, thirdDepth * depthMax),
-			           glm::vec3(1 - -thirdDepth));
+			const glm::vec3 fourthVert(-(column * pixelSize + pixelSize), (-row - 1) * pixelSize,
+			                           thirdDepth * depthMax);
+
+			model.vertices[nextIndex + (image.width + 1)] = Vertex(fourthVert, glm::vec3(1 - -thirdDepth));
+			model.vertices[frontVertexCount + nextIndex + (image.width + 1)] =
+				Vertex(glm::vec3(fourthVert.x, fourthVert.y, depthMin), glm::vec3(0));
 		}
 
 		nextIndex++;
@@ -137,6 +148,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 
 		// Invert the triangles every other column and invert that every other row.
 		if (((pixelIndex ^ row) & 1) == 0) {
+			// Front Panel
 			model.indices.push_back(pixelIndex + row + 0);
 			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
@@ -144,7 +156,17 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			model.indices.push_back(pixelIndex + row + 1);
 			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + 0);
+
+			// Back Panel
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(frontVertexCount + pixelIndex + row + (1 + (image.width + 1)));
 		} else {
+			// Front Panel
 			model.indices.push_back(pixelIndex + row + (1 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + 1);
@@ -152,38 +174,29 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			model.indices.push_back(pixelIndex + row + (0 + (image.width + 1)));
 			model.indices.push_back(pixelIndex + row + 0);
 			model.indices.push_back(pixelIndex + row + 1);
+
+			// Back Panel
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + (1 + (image.width + 1)));
+
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + (0 + (image.width + 1)));
+			model.indices.push_back(frontVertexCount + pixelIndex + row + (1 + (image.width + 1)));
 		}
 
 		column++;
 	}
 
-	// === Back Panel Creation ===
-
-	const size_t frontVertCount = model.vertices.size() - 4;
-	const float depthMin = config->sliderThickMin;
-
-	// Create a vertex at each of the four corners one unit behind, this will hold our back panel.
-	model.vertices[frontVertCount] = Vertex(glm::vec3(0, 0, depthMin), glm::vec3(1));
-	model.vertices[frontVertCount + 1] = Vertex(glm::vec3(-(image.width * pixelSize), 0, depthMin), glm::vec3(1));
-	model.vertices[frontVertCount + 2] = Vertex(glm::vec3(0, -image.height * pixelSize, depthMin), glm::vec3(1));
-	model.vertices[frontVertCount + 3] =
-		Vertex(glm::vec3(-(image.width * pixelSize), -image.height * pixelSize, depthMin), glm::vec3(1));
-
-	model.indices.push_back(frontVertCount + 3);
-	model.indices.push_back(frontVertCount + 1);
-	model.indices.push_back(frontVertCount);
-
-	model.indices.push_back(frontVertCount);
-	model.indices.push_back(frontVertCount + 2);
-	model.indices.push_back(frontVertCount + 3);
-
 	// TODO: This works but it sucks.
 	// Acquire centre offset to centre the mesh in the view port later and ensure it is still accurate if there is an
 	// odd amount.
-	if (const size_t totalVertices = model.vertices.size() - 1; totalVertices % 2 == 0) {
-		model.centerOffset = model.vertices[totalVertices / 2].position;
+	if (const size_t totalVertices = frontVertexCount - 1; totalVertices % 2 == 0) {
+		const glm::vec3 pos = model.vertices[totalVertices / 2].position;
+		model.centerOffset = glm::vec3(pos.x, pos.y, 0.0F);
 	} else {
-		model.centerOffset = model.vertices[model.indices[(model.indices.size() - 1) / 2]].position;
+		const glm::vec3 pos = model.vertices[model.indices[(frontIndexCount - 1) / 2]].position;
+		model.centerOffset = glm::vec3(pos.x, pos.y, 0.0F);
 	}
 
 	const auto endTimePoint = std::chrono::high_resolution_clock::now();
