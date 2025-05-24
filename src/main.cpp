@@ -228,8 +228,8 @@ int main(int argc, char* argv[]) {
 	glEnable(GL_DEPTH_TEST);
 
 	// Set OpenGL clear render colour, the colour drawn if nothing else is.
-	// Dark Gray to be more distinct than black.
-	glClearColor(0.15F, 0.15F, 0.15F, 1.0F);
+	// As we use grayscale to indicate topology, the background colour should be distinct from that.
+	glClearColor(0, 0.102F, 0.188F, 1.0F);
 
 	// Must happen before ImGui initialisation.
 	glfwSetFramebufferSizeCallback(mainWindow, FramebufferSizeCallback);
