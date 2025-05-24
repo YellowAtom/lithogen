@@ -26,6 +26,9 @@ struct Config {
 	float sliderThickMax = 3.2F;
 	float sliderGsPref[4] = {0.3F, 0.59F, 0.11F, 0.0F};
 
+	const char* dropdownMeshTypes[] = {"Plane"};
+	int dropdownMesh = 0;
+
 	// Backend
 	bool aboutOpened = false;
 };

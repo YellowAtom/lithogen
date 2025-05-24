@@ -340,6 +340,11 @@ int main(int argc, char* argv[]) {
 
 		ImGui::SeparatorText("Mesh Configuration");
 
+		if (ImGui::Combo("Mesh Type", &config->dropdownMesh, config->dropdownMeshTypes,
+		                 IM_ARRAYSIZE(config->dropdownMeshTypes))) {
+			// TODO: Implement.
+		}
+
 		ImGui::Text("Dimensions");
 
 		// TODO: The forced ratio does not clamp.
