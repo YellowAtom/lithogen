@@ -31,4 +31,5 @@ struct Config {
 
 	// Backend
 	bool aboutOpened = false;
+	bool helpOpened = false;
 };

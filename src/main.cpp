@@ -300,6 +300,9 @@ int main(int argc, char* argv[]) {
 				if (ImGui::MenuItem("About")) {
 					config->aboutOpened = true;
 				}
+				if (ImGui::MenuItem("Help")) {
+					config->helpOpened = true;
+				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
@@ -322,21 +325,6 @@ int main(int argc, char* argv[]) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5F);
 		}
-
-		ImGui::SeparatorText("Image Processing");
-
-		// TODO: Implement difference kinds of grayscale processing. Currently we are only doing luminance.
-		ImGui::Text("Grayscale Preference");
-		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-		                   ImGuiSliderFlags_AlwaysClamp);
-		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-		                   ImGuiSliderFlags_AlwaysClamp);
-		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-		                   ImGuiSliderFlags_AlwaysClamp);
-
-		/* ImGui::Text("Alpha Thickness");
-		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
-		                   ImGuiSliderFlags_AlwaysClamp); */
 
 		ImGui::SeparatorText("Mesh Configuration");
 
@@ -367,6 +355,21 @@ int main(int argc, char* argv[]) {
 		                       SLIDER_FLOAT_FORMAT_MM)) {
 			config->sliderThickMin = std::min(config->sliderThickMax, config->sliderThickMin);
 		}
+
+		ImGui::SeparatorText("Image Processing");
+
+		// TODO: Implement difference kinds of grayscale processing. Currently we are only doing luminance.
+		ImGui::Text("Grayscale Preference");
+		ImGui::SliderFloat("Red", &config->sliderGsPref[0], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
+		                   ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Green", &config->sliderGsPref[1], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
+		                   ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Blue", &config->sliderGsPref[2], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
+		                   ImGuiSliderFlags_AlwaysClamp);
+
+		/* ImGui::Text("Alpha Thickness");
+		ImGui::SliderFloat("Alpha", &config->sliderGsPref[3], 0.0F, 1.0F, SLIDER_FLOAT_FORMAT,
+		                   ImGuiSliderFlags_AlwaysClamp); */
 
 		ImGui::Spacing();
 
@@ -422,8 +425,50 @@ int main(int argc, char* argv[]) {
 		ImGui::SetNextWindowPos(center);
 
 		if (config->aboutOpened) {
+			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5F, 0.5F));
+
 			ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+			ImGui::Text("A lithophane generation tool with 3D preview and customisation.");
+			ImGui::Spacing();
 			ImGui::Text("Version: 1.0");
+			ImGui::TextLinkOpenURL("Project GitHub", "https://github.com/yellowatom/lithogen");
+			ImGui::End();
+		}
+
+		if (config->helpOpened) {
+			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5F, 0.5F));
+
+			ImGui::Begin("Help", &config->helpOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+			if (ImGui::CollapsingHeader("Importing and Exporting", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Text("Under file, dialogues for loading images and saving models can be found.");
+			}
+
+			if (ImGui::CollapsingHeader("View Customisation", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Text(
+					"Under view, various checkboxes can be found to hide or adjust elements of the 3D model viewer.");
+			}
+
+			if (ImGui::CollapsingHeader("Settings Explanation", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::SeparatorText("Mesh Type");
+				ImGui::Text("Which shape the lithophane image will be placed on.");
+
+				ImGui::SeparatorText("Dimensions");
+				ImGui::Text("The width and height of the final model in millimeters.");
+
+				ImGui::SeparatorText("Thickness");
+				ImGui::Text(
+					"The minium thickness will determine how much space is inbetween the back of the model and the\n"
+					"lowest point in the lithophane depth, the maximum thickness will be the highest point the\n"
+					"lithophane topology can reach.");
+
+				ImGui::SeparatorText("Grayscale Preference");
+				ImGui::Text(
+					"This setting adjusts how red, green and blue are weighted when generating the single height\n"
+					"value per pixel, this should usually be left as default unless there is a specific reason to\n"
+					"change it.");
+			}
+
 			ImGui::End();
 		}
 
