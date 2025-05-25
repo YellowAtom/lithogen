@@ -340,10 +340,8 @@ int main(int argc, char* argv[]) {
 
 		ImGui::SeparatorText("Mesh Configuration");
 
-		if (ImGui::Combo("Mesh Type", &config->dropdownMesh, config->dropdownMeshTypes,
-		                 IM_ARRAYSIZE(config->dropdownMeshTypes))) {
-			// TODO: Implement.
-		}
+		ImGui::Combo("Mesh Type", &config->dropdownMesh, config->dropdownMeshTypes,
+		             IM_ARRAYSIZE(config->dropdownMeshTypes));
 
 		ImGui::Text("Dimensions");
 
