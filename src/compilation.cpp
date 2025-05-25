@@ -147,6 +147,7 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 		// - Adding the pixel index will shift the triangles along by 1 each time, creating the grid.
 		// - Adding the row will ensure the indices does not attempt to wrap one side of the plane to the other
 		// through skipping the triangles that would cause this.
+		// - The numbers added are the relative positions of the surrounding vertex indices.
 
 		// Invert the triangles every other column and invert that every other row.
 		if (((pixelIndex ^ row) & 1) == 0) {
@@ -185,6 +186,51 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 			model.indices.push_back(frontVertexCount + pixelIndex + row + 0);
 			model.indices.push_back(frontVertexCount + pixelIndex + row + (0 + (image.width + 1)));
 			model.indices.push_back(frontVertexCount + pixelIndex + row + (1 + (image.width + 1)));
+		}
+
+		if (firstRow) {
+			// Implement top triangles.
+			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+
+			model.indices.push_back(pixelIndex + row + 1);
+			model.indices.push_back(pixelIndex + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+		}
+
+		if (firstInRow) {
+			// Implement left triangles.
+			model.indices.push_back(pixelIndex + image.width + 1 + row);
+			model.indices.push_back(frontVertexCount + pixelIndex + image.width + 1 + row);
+			model.indices.push_back(frontVertexCount + pixelIndex + row);
+
+			model.indices.push_back(pixelIndex + image.width + 1 + row);
+			model.indices.push_back(frontVertexCount + pixelIndex + row);
+			model.indices.push_back(pixelIndex + row);
+		}
+
+		if (lastInRow) {
+			// Implement right triangles, as we create two vertices at the start of each row, we need to shift this
+			// across one.
+			model.indices.push_back(frontVertexCount + pixelIndex + image.width + 1 + row + 1);
+			model.indices.push_back(pixelIndex + image.width + 1 + row + 1);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+
+			model.indices.push_back(pixelIndex + row + 1);
+			model.indices.push_back(frontVertexCount + pixelIndex + row + 1);
+			model.indices.push_back(pixelIndex + image.width + 1 + row + 1);
+		}
+
+		if (lastRow) {
+			// Implement bottom triangles, need to push the pixel index to the bottom vertex row.
+			model.indices.push_back(frontVertexCount + pixelIndex + image.width + 1 + row + 0);
+			model.indices.push_back(pixelIndex + image.width + 1 + row + 0);
+			model.indices.push_back(frontVertexCount + pixelIndex + image.width + 1 + row + 1);
+
+			model.indices.push_back(frontVertexCount + pixelIndex + image.width + 1 + row + 1);
+			model.indices.push_back(pixelIndex + image.width + 1 + row + 0);
+			model.indices.push_back(pixelIndex + image.width + 1 + row + 1);
 		}
 
 		column++;
