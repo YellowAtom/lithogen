@@ -52,8 +52,10 @@ void CompileModel(Model& model, const Config* config, const Image& image) {
 	// need to calculate the size of one side of the pixel as they will be equal.
 	const float pixelSize = config->sliderWidth / image.width;
 
-	const float depthMax = config->sliderThickMax;
+	// The min depth is space back from zero, the max depth is forward from zero. To avoid going above the max depth the
+	// min depth needs to be taken away from it.
 	const float depthMin = config->sliderThickMin;
+	const float depthMax = config->sliderThickMax - depthMin;
 
 	// Stores the current column the pixel belongs to.
 	int column = 0;
