@@ -187,12 +187,12 @@ void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& mo
 
 	if (ImGui::SliderFloat("Min", &config->sliderThickMin, SLIDER_THICK_MIN, SLIDER_THICK_MAX,
 	                       SLIDER_FLOAT_FORMAT_MM)) {
-		config->sliderThickMax = max(config->sliderThickMin, config->sliderThickMax);
+		config->sliderThickMax = std::max(config->sliderThickMin, config->sliderThickMax);
 	}
 
 	if (ImGui::SliderFloat("Max", &config->sliderThickMax, SLIDER_THICK_MIN, SLIDER_THICK_MAX,
 	                       SLIDER_FLOAT_FORMAT_MM)) {
-		config->sliderThickMin = min(config->sliderThickMax, config->sliderThickMin);
+		config->sliderThickMin = std::min(config->sliderThickMax, config->sliderThickMin);
 	}
 
 	ImGui::SeparatorText("Image Processing");
@@ -218,7 +218,7 @@ void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& mo
 		render->entity.SetPosition(-model.centerOffset);
 
 		// Adjust the zoom to focus on the mesh based on the size of it.
-		render->camera.SetZoom(max(config->sliderWidth, config->sliderHeight) / 1.5F);
+		render->camera.SetZoom(std::max(config->sliderWidth, config->sliderHeight) / 1.5F);
 
 		// TODO: Add visual error if compile fails.
 	}

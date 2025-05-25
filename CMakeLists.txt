@@ -33,7 +33,7 @@ if (WIN32) # Windows
 	# WIN32_LEAN_AND_MEAN - Active optional windows api optimisation features.
 	# OS_WINDOWS - For the codebase to ask if the program will be compiling to windows.
 	# GLFW_EXPOSE_NATIVE_WIN32 - Allows the codebase to access the native windows handle through GLFW.
-	target_compile_definitions(LithoGen_App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN GLFW_EXPOSE_NATIVE_WIN32)
+	target_compile_definitions(LithoGen_App PRIVATE OS_WINDOWS WIN32_LEAN_AND_MEAN)
 
 	# Link the Windows Desktop Window Manager API to interface with the title bar.
 	target_link_libraries(LithoGen_App PRIVATE dwmapi)
