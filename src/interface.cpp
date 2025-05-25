@@ -267,7 +267,7 @@ void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& mo
 		ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 		ImGui::Text("A lithophane generation tool with 3D preview and customisation.");
 		ImGui::Spacing();
-		ImGui::Text("Version: 1.0");
+		ImGui::Text("Version: 1.0.0");
 		ImGui::TextLinkOpenURL("Project GitHub", "https://github.com/yellowatom/lithogen");
 		ImGui::End();
 	}
