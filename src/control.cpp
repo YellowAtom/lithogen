@@ -30,8 +30,6 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 		return;
 	}
 
-	// TODO: Rotating the cube too much will make this inaccurate, find a way.
-
 	// Store previous mouse location to calculate difference.
 	// Static allows a variable to persist through multiple function calls.
 	static double previousX = 0;

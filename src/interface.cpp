@@ -211,6 +211,9 @@ void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& mo
 	ImGui::Spacing();
 
 	if (ImGui::Button("Compile")) {
+		// TODO: Add some visual indicator that the process is on going.
+		// Ideally place the compile processes onto a different thread so some sort of simple animation can play on the
+		// loading popup to indicate it has not crashed.
 		CompileModel(model, config, image);
 		render->entity.LoadModel(model);
 
