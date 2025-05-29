@@ -137,11 +137,11 @@ void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& mo
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Help")) {
-			if (ImGui::MenuItem("About")) {
-				config->aboutOpened = true;
-			}
 			if (ImGui::MenuItem("Help")) {
 				config->helpOpened = true;
+			}
+			if (ImGui::MenuItem("About")) {
+				config->aboutOpened = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -261,51 +261,59 @@ void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& mo
 		ImGui::PopStyleVar();
 	}
 
-	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 	ImGui::SetNextWindowPos(center);
 
 	if (config->aboutOpened) {
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5F, 0.5F));
+		ImGui::SetNextWindowSize(ImVec2(500, 100));
 
-		ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-		ImGui::Text("A lithophane generation tool with 3D preview and customisation.");
+		ImGui::Begin("About", &config->aboutOpened, ImGuiWindowFlags_NoCollapse);
+		ImGui::TextWrapped("A lithophane generation tool with 3D preview and customisation.");
 		ImGui::Spacing();
-		ImGui::Text("Version: 1.0.0");
+		ImGui::TextWrapped("Version: 1.0.0");
 		ImGui::TextLinkOpenURL("Project GitHub", "https://github.com/yellowatom/lithogen");
 		ImGui::End();
 	}
 
 	if (config->helpOpened) {
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5F, 0.5F));
+		ImGui::SetNextWindowSize(ImVec2(500, 500));
 
-		ImGui::Begin("Help", &config->helpOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin("Help", &config->helpOpened, ImGuiWindowFlags_NoCollapse);
+
+		if (ImGui::CollapsingHeader("Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::TextWrapped("Sliders can be control clicked to enter specific numbers manually.\nThe 3D preview can "
+			                   "be dragged to rotate the camera and mouse wheel will zoom in and out.");
+		}
 
 		if (ImGui::CollapsingHeader("Importing and Exporting", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Text("Under file, dialogues for loading images and saving models can be found.");
+			ImGui::TextWrapped("Under file, dialogues for loading images and saving models can be found.");
 		}
 
 		if (ImGui::CollapsingHeader("View Customisation", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Text(
+			ImGui::TextWrapped(
 				"Under view, various checkboxes can be found to hide or adjust elements of the 3D model viewer.");
 		}
 
 		if (ImGui::CollapsingHeader("Settings Explanation", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::SeparatorText("Mesh Type");
-			ImGui::Text("Which shape the lithophane image will be placed on.");
+			ImGui::TextWrapped("Which shape the lithophane image will be placed on.");
 
 			ImGui::SeparatorText("Dimensions");
-			ImGui::Text("The width and height of the final model in millimeters.");
+			ImGui::TextWrapped("The width and height of the final model in millimeters.");
 
 			ImGui::SeparatorText("Thickness");
-			ImGui::Text(
-				"The minium thickness will determine how much space is inbetween the back of the model and the\n"
-				"lowest point in the lithophane depth, the maximum thickness will be the highest point the\n"
+			ImGui::TextWrapped(
+				"The minium thickness will determine how much space is inbetween the back of the model and the "
+				"lowest point in the lithophane depth, the maximum thickness will be the highest point the "
 				"lithophane topology can reach.");
 
 			ImGui::SeparatorText("Grayscale Preference");
-			ImGui::Text("This setting adjusts how red, green and blue are weighted when generating the single height\n"
-			            "value per pixel, this should usually be left as default unless there is a specific reason to\n"
-			            "change it.");
+			ImGui::TextWrapped(
+				"This setting adjusts how red, green and blue are weighted when generating the single height "
+				"value per pixel, this should usually be left as default unless there is a specific reason to "
+				"change it.");
 		}
 
 		ImGui::End();
