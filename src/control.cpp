@@ -1,14 +1,17 @@
+// SPDX-License-Identifier: GPL-3.0
 #include "control.h"
 #include "GLFW/glfw3.h"
 #include "glad/gl.h"
 
-void FramebufferSizeCallback(GLFWwindow* window, const int width, const int height) {
+void FramebufferSizeCallback(GLFWwindow* window, const int width, const int height)
+{
 	const auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 	// Recalculate viewport size when the window is resized.
 	data->render->CalcViewport(width, height);
 }
 
-void KeyCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
+void KeyCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
+{
 	const auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
 	if (!data->render->entity.HasModel()) {
@@ -23,7 +26,8 @@ void KeyCallback(GLFWwindow* window, const int key, const int scancode, const in
 	}
 }
 
-void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
+void CursorPosCallback(GLFWwindow* window, const double x, const double y)
+{
 	auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
 	if (!data->render->entity.HasModel()) {
@@ -53,7 +57,8 @@ void CursorPosCallback(GLFWwindow* window, const double x, const double y) {
 	previousY = y;
 }
 
-void ScrollCallback(GLFWwindow* window, const double x, const double y) {
+void ScrollCallback(GLFWwindow* window, const double x, const double y)
+{
 	const auto* data = static_cast<glfwUserData*>(glfwGetWindowUserPointer(window));
 
 	// Move 4mm per scroll.

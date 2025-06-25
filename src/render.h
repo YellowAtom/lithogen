@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 #pragma once
 
 #include <GLFW/glfw3.h>

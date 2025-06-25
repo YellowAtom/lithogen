@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 #pragma once
 
 #define DEFAULT_WINDOW_WIDTH 800

@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0
 #include "camera.h"
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>
 #include <numbers>
 
-void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {
+void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const
+{
 	// The projection matrix.
 	mvp *= glm::perspective(glm::radians(m_fov), aspectRatio, m_nearZ, m_farZ);
 
@@ -19,7 +21,8 @@ void Camera::ApplyMatrix(glm::mat4& mvp, const float aspectRatio) const {
 	mvp *= glm::lookAt(eye, m_target, m_up);
 }
 
-void Camera::RotateHorizontal(const float radians) {
+void Camera::RotateHorizontal(const float radians)
+{
 	m_azimuthAngle += radians;
 
 	// Keep azimuth angle within range <0..2PI) - it's not necessary, but can help in certain scenarios.
@@ -32,7 +35,8 @@ void Camera::RotateHorizontal(const float radians) {
 	}
 }
 
-void Camera::RotateVertical(const float radians) {
+void Camera::RotateVertical(const float radians)
+{
 	m_polarAngle += radians;
 
 	// Check if the angle hasn't exceeded quarter of a circle to prevent flip, add a bit of epsilon like 0.001 radians
@@ -42,36 +46,44 @@ void Camera::RotateVertical(const float radians) {
 	m_polarAngle = std::max(m_polarAngle, -polarCap);
 }
 
-void Camera::ResetRotation() {
+void Camera::ResetRotation()
+{
 	m_azimuthAngle = m_defaultAzimuthAngle;
 	m_polarAngle = 0.0F;
 }
 
-void Camera::Zoom(const float amount) {
+void Camera::Zoom(const float amount)
+{
 	m_radius -= amount;
 	m_radius = std::max(m_radius, m_minRadius);
 }
 
-void Camera::SetZoom(const float amount) {
+void Camera::SetZoom(const float amount)
+{
 	m_radius = amount;
 }
 
-void Camera::SetTargetPos(const glm::vec3& target) {
+void Camera::SetTargetPos(const glm::vec3& target)
+{
 	m_target = target;
 }
 
-void Camera::SetUpDirection(const glm::vec3& up) {
+void Camera::SetUpDirection(const glm::vec3& up)
+{
 	m_up = up;
 }
 
-void Camera::SetFov(const float fov) {
+void Camera::SetFov(const float fov)
+{
 	m_fov = fov;
 }
 
-void Camera::SetNearZ(const float nearZ) {
+void Camera::SetNearZ(const float nearZ)
+{
 	m_nearZ = nearZ;
 }
 
-void Camera::SetFarZ(const float farZ) {
+void Camera::SetFarZ(const float farZ)
+{
 	m_farZ = farZ;
 }

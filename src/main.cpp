@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 #include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -9,11 +10,12 @@
 #include "config.h"
 #include "constants.h"
 #include "control.h"
-#include "image.h"
 #include "interface.h"
 #include "render.h"
+#include "structures.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 	// Initialize the GLFW3 library.
 	if (glfwInit() == 0) {
 		return 1;

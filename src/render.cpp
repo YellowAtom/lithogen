@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0
 #include "render.h"
 #include <glad/gl.h>
 #include <glm/mat4x4.hpp>
 #include "constants.h"
 
-Render::Render(GLFWwindow* window, Config* config) : m_window(window), m_config(config) {
+Render::Render(GLFWwindow* window, Config* config) : m_window(window), m_config(config)
+{
 	// Ensure our OpenGL configurations will affect the correct context.
 	glfwMakeContextCurrent(window);
 
@@ -14,7 +16,8 @@ Render::Render(GLFWwindow* window, Config* config) : m_window(window), m_config(
 	CalcViewport(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 }
 
-void Render::Draw() const {
+void Render::Draw() const
+{
 	// Only draw if desired and if a model has been compiled.
 	if (m_config->drawPreview && entity.HasModel()) {
 		glm::mat4 mvp(1.0F);
@@ -23,7 +26,8 @@ void Render::Draw() const {
 	}
 }
 
-void Render::UpdateWireframe() const {
+void Render::UpdateWireframe() const
+{
 	// Render back side of wireframe faces.
 	if (m_config->drawWireframe) {
 		glDisable(GL_CULL_FACE);
@@ -35,7 +39,8 @@ void Render::UpdateWireframe() const {
 	glPolygonMode(GL_FRONT_AND_BACK, m_config->drawWireframe ? GL_LINE : GL_FILL);
 }
 
-void Render::CalcViewport(int width, int height) {
+void Render::CalcViewport(int width, int height)
+{
 	// Place the renderer viewport to the right of the sidepanel and below the menu bar.
 	// The render calculations need access to this data also.
 	m_viewportWidth = width - GUI_SIDEPANEL_WIDTH;
@@ -45,14 +50,17 @@ void Render::CalcViewport(int width, int height) {
 	glViewport(GUI_SIDEPANEL_WIDTH, 0, m_viewportWidth, m_viewportHeight);
 }
 
-int Render::GetViewportWidth() const {
+int Render::GetViewportWidth() const
+{
 	return m_viewportWidth;
 }
 
-int Render::GetViewportHeight() const {
+int Render::GetViewportHeight() const
+{
 	return m_viewportHeight;
 }
 
-float Render::GetAspectRatio() const {
+float Render::GetAspectRatio() const
+{
 	return m_aspectRatio;
 }

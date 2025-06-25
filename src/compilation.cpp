@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 #include "compilation.h"
 #include <chrono>
 #include <iostream>
@@ -5,7 +6,8 @@
 #include <thread>
 #include <vector>
 
-float GetDepth(const int index, const Config* config, const Image& image) {
+float GetDepth(const int index, const Config* config, const Image& image)
+{
 	const int rgbaIndex = index * 4;
 
 	// Calculate the grayscale out of the RGB values, weighted by the config.
@@ -25,7 +27,8 @@ float GetDepth(const int index, const Config* config, const Image& image) {
 	return -depth;
 }
 
-void CompileModel(Model& model, const Config* config, const Image& image) {
+void CompileModel(Model& model, const Config* config, const Image& image)
+{
 	std::cout << "Compiling mesh...\n";
 	std::flush(std::cout);
 
@@ -273,18 +276,22 @@ struct CustomMeshProvider : microstl::Writer::Provider {
 
 	CustomMeshProvider(const Model& m) : model(m) {}
 
-	bool asciiMode() override {
+	bool asciiMode() override
+	{
 		return ascii;
 	}
-	bool nullifyNormals() override {
+	bool nullifyNormals() override
+	{
 		return clearNormals;
 	}
 
-	size_t getFacetCount() override {
+	size_t getFacetCount() override
+	{
 		return model.indices.size() / 3;
 	}
 
-	void getFacet(size_t index, float v1[3], float v2[3], float v3[3], float n[3]) override {
+	void getFacet(size_t index, float v1[3], float v2[3], float v3[3], float n[3]) override
+	{
 		index *= 3;
 
 		v1[0] = model.vertices[model.indices[index]].position.x;
@@ -299,7 +306,8 @@ struct CustomMeshProvider : microstl::Writer::Provider {
 	}
 };
 
-void WriteModel(const char* filePath, const Model& model) {
+void WriteModel(const char* filePath, const Model& model)
+{
 	using namespace microstl;
 
 	CustomMeshProvider provider(model);

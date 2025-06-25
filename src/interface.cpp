@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 #include "interface.h"
 #include <algorithm>
 #include <glad/gl.h>
@@ -12,7 +13,8 @@
 #include "render.h"
 
 // A simple function to send the image data to the gpu and return the pointer.
-GLuint LoadTexture(const stbi_uc* image, const int width, const int height) {
+GLuint LoadTexture(const stbi_uc* image, const int width, const int height)
+{
 	GLuint imageTexture = 0;
 	glGenTextures(1, &imageTexture);
 	glBindTexture(GL_TEXTURE_2D, imageTexture);
@@ -26,7 +28,8 @@ GLuint LoadTexture(const stbi_uc* image, const int width, const int height) {
 	return imageTexture;
 }
 
-void ImportButton(GLFWwindow* window, Image& image, Config* config) {
+void ImportButton(GLFWwindow* window, Image& image, Config* config)
+{
 	constexpr nfdu8filteritem_t filters[1] = {
 		{"Image", "jpg,jpeg,png,tga,bmp,psd,gif,hdr,pic"},
 	};
@@ -79,7 +82,8 @@ void ImportButton(GLFWwindow* window, Image& image, Config* config) {
 	NFD_FreePathU8(outPath);
 }
 
-void ExportButton(GLFWwindow* window, const Model& model) {
+void ExportButton(GLFWwindow* window, const Model& model)
+{
 	if (model.indices.empty()) {
 		return;
 	}
@@ -109,7 +113,8 @@ void ExportButton(GLFWwindow* window, const Model& model) {
 	NFD_FreePathU8(outPath);
 }
 
-void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& model, Render* render) {
+void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& model, Render* render)
+{
 	// Menu bar
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")) {

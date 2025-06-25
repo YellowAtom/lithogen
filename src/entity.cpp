@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 #include "entity.h"
 #include <algorithm>
 #include <battery/embed.hpp>
@@ -8,11 +9,12 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <iostream>
-#include "vertex.h"
+#include "structures.h"
 
 // Shader initialization functions.
 
-GLuint LoadShader(const char* pFileContent, const GLenum shaderType) {
+GLuint LoadShader(const char* pFileContent, const GLenum shaderType)
+{
 	const GLuint shader = glCreateShader(shaderType);
 
 	if (shader == 0) {
@@ -46,7 +48,8 @@ GLuint LoadShader(const char* pFileContent, const GLenum shaderType) {
 	return shader;
 }
 
-GLuint InitShaders() {
+GLuint InitShaders()
+{
 	const GLuint shaderProgram = glCreateProgram();
 
 	if (shaderProgram == 0) {
@@ -92,11 +95,13 @@ GLuint InitShaders() {
 	return shaderProgram;
 }
 
-Entity::Entity(const Model& model) {
+Entity::Entity(const Model& model)
+{
 	LoadModel(model);
 }
 
-void Entity::Draw(glm::mat4 mvp) const {
+void Entity::Draw(glm::mat4 mvp) const
+{
 	// Apply translation / position to the matrix.
 	mvp = glm::translate(mvp, glm::vec3(m_position.x, m_position.y, m_position.z));
 
@@ -121,7 +126,8 @@ void Entity::Draw(glm::mat4 mvp) const {
 	glBindVertexArray(0);
 }
 
-void Entity::LoadModel(const Model& model) {
+void Entity::LoadModel(const Model& model)
+{
 	const GLuint shaderProgram = InitShaders();
 
 	// Clear out the previous model if it exists.
@@ -163,22 +169,26 @@ void Entity::LoadModel(const Model& model) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-bool Entity::HasModel() const {
+bool Entity::HasModel() const
+{
 	return m_vao != 0;
 }
 
-void Entity::SetPosition(const glm::vec3& position) {
+void Entity::SetPosition(const glm::vec3& position)
+{
 	m_position = position;
 }
 
-void Entity::SetRotation(const glm::vec3& rotation) {
+void Entity::SetRotation(const glm::vec3& rotation)
+{
 	// Disallow setting rotations higher than 360 degrees.
 	assert(rotation.x < 360.0F || rotation.y < 360.0F || rotation.z < 360.0F);
 
 	m_rotation = rotation;
 }
 
-void Entity::Rotate(const glm::vec3& rotation) {
+void Entity::Rotate(const glm::vec3& rotation)
+{
 	m_rotation += rotation;
 
 	// Ensure rotation does not go over 360 degrees to avoid precision loss.
@@ -187,10 +197,12 @@ void Entity::Rotate(const glm::vec3& rotation) {
 	m_rotation.z = m_rotation.z >= 360.0F ? m_rotation.z - 360.0F : m_rotation.z;
 }
 
-void Entity::SetScale(const glm::vec3& scale) {
+void Entity::SetScale(const glm::vec3& scale)
+{
 	m_scale = scale;
 }
 
-void Entity::ResetRotation() {
+void Entity::ResetRotation()
+{
 	SetRotation(glm::vec3(0.0F, 0.0F, 0.0F)); // Reset object rotation.
 }
