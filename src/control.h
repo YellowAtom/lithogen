@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 #pragma once
 
-#include "config.h"
-#include "render.h"
+#include "declarations/config.h"
+#include "renderer/render.h"
 
 struct glfwUserData {
 	bool cursorWithinViewport = false;

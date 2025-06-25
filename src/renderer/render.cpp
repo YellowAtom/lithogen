@@ -2,7 +2,7 @@
 #include "render.h"
 #include <glad/gl.h>
 #include <glm/mat4x4.hpp>
-#include "constants.h"
+#include "../declarations/constants.h"
 
 Render::Render(GLFWwindow* window, Config* config) : m_window(window), m_config(config)
 {

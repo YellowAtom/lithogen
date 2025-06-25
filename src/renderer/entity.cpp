@@ -9,7 +9,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <iostream>
-#include "structures.h"
+#include "../declarations/structures.h"
 
 // Shader initialization functions.
 

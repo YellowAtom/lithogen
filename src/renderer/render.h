@@ -2,8 +2,8 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include "../declarations/config.h"
 #include "camera.h"
-#include "config.h"
 #include "entity.h"
 
 class Render {

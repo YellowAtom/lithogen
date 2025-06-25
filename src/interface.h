@@ -2,8 +2,8 @@
 #pragma once
 
 #include "GLFW/glfw3.h"
-#include "config.h"
-#include "render.h"
-#include "structures.h"
+#include "declarations/config.h"
+#include "declarations/structures.h"
+#include "renderer/render.h"
 
 void RenderInterface(GLFWwindow* window, Image& image, Config* config, Model& model, Render* render);

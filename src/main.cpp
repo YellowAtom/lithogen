@@ -7,12 +7,12 @@
 #include <iostream>
 #include <nfd_glfw3.h>
 #include <numeric>
-#include "config.h"
-#include "constants.h"
 #include "control.h"
+#include "declarations/config.h"
+#include "declarations/constants.h"
+#include "declarations/structures.h"
 #include "interface.h"
-#include "render.h"
-#include "structures.h"
+#include "renderer/render.h"
 
 int main(int argc, char* argv[])
 {
