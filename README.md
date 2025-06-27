@@ -4,6 +4,8 @@ A cross-platform lithophane generator with 3D preview and in-depth configuration
 customizability and usability in mind. Supports loading images of types `jpeg`, `png`, `tga`, `bmp`, `psd`, `gif`,
 `hdr`, `pic` and exports to `stl`.
 
+![Application Preview](res/preview.png)
+
 ## Bundled Dependencies
 
 The official name, source and version of the project dependencies.
