@@ -23,7 +23,7 @@ add_subdirectory(deps/nativefiledialog-extended-1.2.1)
 add_subdirectory(deps/stb_image-2.30)
 
 # Automatically recursively gather all source files under src.
-file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 
 if (WIN32) # Windows
 	# Create the executable, with additional files for Windows.
