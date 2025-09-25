@@ -23,7 +23,7 @@ The official name, source and version of the project dependencies.
 | Name                                                                             | Version                                                                                               |
 |----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | [Battery Embed](https://github.com/batterycenter/embed)                          | 1.2.19                                                                                                |
-| [Glad](https://github.com/dav1dde/glad)                                          | 2.0.8                                                                                                 |
+| [Glew CMake](https://github.com/Perlmint/glew-cmake)                             | 2.2.0                                                                                                 |
 | [GLFW](https://github.com/glfw/glfw)                                             | 3.4                                                                                                   |
 | [GLM](https://github.com/g-truc/glm)                                             | 1.0.1                                                                                                 |
 | [Dear ImGui](https://github.com/ocornut/imgui)                                   | 1.91.8                                                                                                |
