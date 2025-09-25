@@ -9,9 +9,7 @@ CPMAddPackage("https://github.com/batterycenter/embed.git#v1.2.19")
 CPMAddPackage("https://github.com/glfw/glfw.git#3.4")
 CPMAddPackage("https://github.com/g-truc/glm.git#1.0.1")
 CPMAddPackage("https://github.com/btzy/nativefiledialog-extended.git#v1.2.1")
-
-# Bundled
-add_subdirectory(thirdparty/glad-2.0.8 EXCLUDE_FROM_ALL)
+CPMAddPackage("https://github.com/Perlmint/glew-cmake.git#a9714943d5e08cbc596a7f2758195148df5dc628")
 
 ############################################################
 #                         MicroSTL                         #

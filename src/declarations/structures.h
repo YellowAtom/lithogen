@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 #pragma once
 
-#include <glad/gl.h>
+#include <GL/glew.h>
 #include <glm/vec3.hpp>
 #include <stb_image.h>
 #include <vector>

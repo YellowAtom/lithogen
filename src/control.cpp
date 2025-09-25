@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 #include "control.h"
-#include "GLFW/glfw3.h"
-#include "glad/gl.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 void FramebufferSizeCallback(GLFWwindow* window, const int width, const int height)
 {

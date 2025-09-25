@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 #include "render.h"
-#include <glad/gl.h>
+#include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 #include "../declarations/constants.h"
 
