@@ -13,17 +13,20 @@ the [GitHub Releases](https://github.com/YellowAtom/lithogen/releases), otherwis
 
 ### Building From Source
 
-[Battery Embed](https://github.com/batterycenter/embed), [GLFW](https://github.com/glfw/glfw), [GLM](https://github.com/g-truc/glm)
-and [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended) are automatically downloaded and
-compiled from source.
+The project uses the CMake build system with all dependencies either bundled or automatically downloaded. Therefore,
+CMake can be used as normal.
 
-#### Bundled Dependencies
+## Dependencies
 
-Some dependencies require modification to integrate with CMake, below are the official names, sources and versions.
+The official name, source and version of the project dependencies.
 
-| Name                                            | Version                                                                                               |
-|-------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [Glad](https://github.com/dav1dde/glad)         | 2.0.8                                                                                                 |
-| [Dear ImGui](https://github.com/ocornut/imgui)  | 1.91.8                                                                                                |
-| [microstl](https://github.com/cry-inc/microstl) | Commit [ec3868a](https://github.com/cry-inc/microstl/commit/ec3868a14d8eff40f7945b39758edf623f609b6f) |
-| [std_image](https://github.com/nothings/stb)    | 2.30                                                                                                  |
+| Name                                                                             | Version                                                                                               |
+|----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| [Battery Embed](https://github.com/batterycenter/embed)                          | 1.2.19                                                                                                |
+| [Glad](https://github.com/dav1dde/glad)                                          | 2.0.8                                                                                                 |
+| [GLFW](https://github.com/glfw/glfw)                                             | 3.4                                                                                                   |
+| [GLM](https://github.com/g-truc/glm)                                             | 1.0.1                                                                                                 |
+| [Dear ImGui](https://github.com/ocornut/imgui)                                   | 1.91.8                                                                                                |
+| [microstl](https://github.com/cry-inc/microstl)                                  | Commit [ec3868a](https://github.com/cry-inc/microstl/commit/ec3868a14d8eff40f7945b39758edf623f609b6f) |
+| [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended) | 1.2.1                                                                                                 |
+| [std_image](https://github.com/nothings/stb)                                     | 2.30                                                                                                  |
