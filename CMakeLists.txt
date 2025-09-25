@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.30)
-project(LithoGen VERSION 1.0.0 LANGUAGES CXX)
+project(LithoGen LANGUAGES CXX)
 
 # Refuse to compile on older versions of C++.
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(thirdparty/CPM.cmake)
 
 # Configuration for GLFW.
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
@@ -12,15 +14,17 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Configuration for battery embed.
 set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
-# Include project dependencies.
-add_subdirectory(deps/battery-embed-1.2.19)
-add_subdirectory(deps/glad-2.0.8)
-add_subdirectory(deps/glfw-3.4)
-add_subdirectory(deps/glm-1.0.1)
-add_subdirectory(deps/imgui-1.91.8)
-add_subdirectory(deps/microstl)
-add_subdirectory(deps/nativefiledialog-extended-1.2.1)
-add_subdirectory(deps/stb_image-2.30)
+# Dependencies
+CPMAddPackage("gh:batterycenter/embed#v1.2.19")
+CPMAddPackage("gh:glfw/glfw#3.4")
+CPMAddPackage("gh:g-truc/glm#1.0.1")
+CPMAddPackage("gh:btzy/nativefiledialog-extended#v1.2.1")
+
+# Bundled Dependencies
+add_subdirectory(thirdparty/glad-2.0.8)
+add_subdirectory(thirdparty/stb_image-2.30)
+add_subdirectory(thirdparty/imgui-1.91.8)
+add_subdirectory(thirdparty/microstl-ec3868a)
 
 # Automatically recursively gather all source files under src.
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
