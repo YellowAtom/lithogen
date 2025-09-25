@@ -63,9 +63,10 @@ if (imgui_ADDED)
 
 	file(GLOB_RECURSE imgui_FINAL_SOURCE_FILES ${imgui_SOURCE_DIR}/include/*.cpp)
 
-	add_library(imgui ${imgui_FINAL_SOURCE_FILES})
+	add_library(imgui STATIC ${imgui_FINAL_SOURCE_FILES})
 	target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR}/include)
 	target_link_libraries(imgui PRIVATE glfw)
+	set_target_properties(imgui PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${imgui_BINARY_DIR}")
 endif ()
 
 CPMAddPackage(
@@ -87,8 +88,9 @@ if (stb_ADDED)
 		file(REMOVE ${stb_SOURCE_DIR}/stb_image.h)
 	endif ()
 
-	add_library(stb_image ${stb_SOURCE_DIR}/stb_image.c)
+	add_library(stb_image STATIC ${stb_SOURCE_DIR}/stb_image.c)
 	target_include_directories(stb_image PUBLIC ${stb_SOURCE_DIR}/includes)
+	set_target_properties(stb_image PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${stb_BINARY_DIR}")
 endif ()
 
 # Bundled Dependencies
