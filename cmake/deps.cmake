@@ -5,10 +5,10 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Configuration for battery embed.
 set(B_PRODUCTION_MODE ON CACHE BOOL "" FORCE)
 
-CPMAddPackage("https://github.com/batterycenter/embed.git#v1.2.19")
-CPMAddPackage("https://github.com/glfw/glfw.git#3.4")
-CPMAddPackage("https://github.com/g-truc/glm.git#1.0.1")
-CPMAddPackage("https://github.com/btzy/nativefiledialog-extended.git#v1.2.1")
+CPMAddPackage("https://github.com/batterycenter/embed.git@1.2.19#fdbae3fa33e96824726b68d9a8f64ba6be3833c6")
+CPMAddPackage("https://github.com/glfw/glfw.git@3.4#7b6aead9fb88b3623e3b3725ebb42670cbe4c579")
+CPMAddPackage("https://github.com/g-truc/glm.git@1.0.1#0af55ccecd98d4e5a8d1fad7de25ba429d60e863")
+CPMAddPackage("https://github.com/btzy/nativefiledialog-extended.git@1.2.1#86d5f2005fe1c00747348a12070fec493ea2407e")
 CPMAddPackage("https://github.com/Perlmint/glew-cmake.git#a9714943d5e08cbc596a7f2758195148df5dc628")
 
 ############################################################
@@ -33,8 +33,9 @@ endif ()
 
 CPMAddPackage(
 		NAME imgui
+		VERSION 1.92.3
 		GIT_REPOSITORY "https://github.com/ocornut/imgui.git"
-		GIT_TAG "v1.92.3"
+		GIT_TAG "bf75bfec48fc00f532af8926130b70c0e26eb099"
 		DOWNLOAD_ONLY YES
 )
 
