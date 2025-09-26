@@ -45,4 +45,4 @@ b_embed(LithoGen_App res/shaders/fragment.glsl)
 set_target_properties(LithoGen_App PROPERTIES OUTPUT_NAME "lithogen")
 
 # Link dependencies to the application.
-target_link_libraries(LithoGen_App PRIVATE libglew_static glfw glm imgui microstl nfd stb_image)
+target_link_libraries(LithoGen_App PRIVATE glad glfw glm imgui microstl nfd stb_image)

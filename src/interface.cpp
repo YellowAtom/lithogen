@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 #include "interface.h"
-#include <GL/glew.h>
 #include <algorithm>
+#include <glad/gl.h>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <iostream>

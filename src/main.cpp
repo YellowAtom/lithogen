@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <glad/gl.h>
 #include <imgui.h>
 #include <iostream>
 #include <nfd_glfw3.h>
@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
 	// Set the OpenGL context of this window as active for this thread.
 	glfwMakeContextCurrent(mainWindow);
 
-	// Initialise OpenGL, this will automatically attach to the GLFW created context.
-	if (glewInit() != GLEW_OK) {
+	// Initialise OpenGL and attach it to the GLFW OpenGL Context.
+	if (gladLoadGL(glfwGetProcAddress) == 0) {
 		return 1;
 	}
 

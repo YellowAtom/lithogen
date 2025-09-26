@@ -9,7 +9,27 @@ CPMAddPackage("https://github.com/batterycenter/embed.git@1.2.19#fdbae3fa33e9682
 CPMAddPackage("https://github.com/glfw/glfw.git@3.4#7b6aead9fb88b3623e3b3725ebb42670cbe4c579")
 CPMAddPackage("https://github.com/g-truc/glm.git@1.0.1#0af55ccecd98d4e5a8d1fad7de25ba429d60e863")
 CPMAddPackage("https://github.com/btzy/nativefiledialog-extended.git@1.2.1#86d5f2005fe1c00747348a12070fec493ea2407e")
-CPMAddPackage("https://github.com/Perlmint/glew-cmake.git#a9714943d5e08cbc596a7f2758195148df5dc628")
+
+############################################################
+#                           Glad                           #
+############################################################
+
+CPMAddPackage(
+		NAME glad
+		VERSION 2.0.8
+		GIT_REPOSITORY "https://github.com/Dav1dde/glad.git"
+		GIT_TAG "73db193f853e2ee079bf3ca8a64aa2eaf6459043"
+		DOWNLOAD_ONLY YES
+)
+
+if (glad_ADDED)
+	set(GLAD_SOURCES_DIR ${glad_SOURCE_DIR})
+
+	add_subdirectory("${GLAD_SOURCES_DIR}/cmake" glad_cmake)
+
+	glad_add_library(glad STATIC EXCLUDE_FROM_ALL REPRODUCIBLE LOCATION "${glad_BINARY_DIR}/source" API gl:core=4.6)
+	set_target_properties(glad PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${glad_BINARY_DIR})
+endif ()
 
 ############################################################
 #                         MicroSTL                         #
