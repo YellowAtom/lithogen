@@ -7,17 +7,13 @@ customizability and usability in mind. Supports loading images of types `jpeg`, 
 ![Application Preview](./res/preview.png)
 
 ## Installation
-
-Windows users can download the latest binary from
-the [GitHub Releases](https://github.com/YellowAtom/lithogen/releases), otherwise it must be built from source.
+Windows users can download the latest binary from the [GitHub Releases](https://github.com/YellowAtom/lithogen/releases),
+otherwise it must be built from source.
 
 ### Building From Source
-
-The project uses the CMake build system with all dependencies either bundled or automatically downloaded. Therefore,
-CMake can be used as normal.
+The project uses the CMake build system with all dependencies bundled. Therefore, CMake can be used as normal.
 
 ## Dependencies
-
 The official name, source and version of the project dependencies.
 
 | Name                        | Version        | Source                                                                            | 
