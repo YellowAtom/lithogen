@@ -9,7 +9,7 @@ class Entity {
 public:
 	Entity() = default;
 	explicit Entity(const Model& model);
-	void Draw(glm::mat4& mvp) const;
+	void Draw(glm::mat4 mvp) const;
 
 	void LoadModel(const Model& model);
 	[[nodiscard]] bool HasModel() const;

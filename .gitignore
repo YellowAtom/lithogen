@@ -1,10 +1,12 @@
-# IDE Files
-/.idea/
-/.vscode/
-/.vs/
-/CMakeSettings.json
+# Project Files
+.zed
+.vscode
+.vs
+.idea
+*.temp
+*.rdproj
 
-# Build Files
+# Compiled Files
 /cmake-build-*/
 /bin/
 /out/

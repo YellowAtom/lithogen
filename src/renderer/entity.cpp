@@ -100,7 +100,7 @@ Entity::Entity(const Model& model)
 	LoadModel(model);
 }
 
-void Entity::Draw(glm::mat4& mvp) const
+void Entity::Draw(glm::mat4 mvp) const
 {
 	// Apply translation / position to the matrix.
 	mvp = glm::translate(mvp, glm::vec3(m_position.x, m_position.y, m_position.z));

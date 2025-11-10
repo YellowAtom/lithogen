@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	// Set the OpenGL context of this window as active for this thread.
 	glfwMakeContextCurrent(mainWindow);
 
-	// Initialise OpenGL and attach it to the GLFW OpenGL Context.
+	// Load OpenGL for glad and avoid glad doing what GLFW3 has already done by attaching them.
 	if (gladLoadGL(glfwGetProcAddress) == 0) {
 		return 1;
 	}

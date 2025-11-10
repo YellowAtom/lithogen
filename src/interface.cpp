@@ -2,14 +2,14 @@
 #include "interface.h"
 #include <algorithm>
 #include <glad/gl.h>
-#include <imgui.h>
-#include <imgui_internal.h>
 #include <iostream>
-#include <nfd_glfw3.h>
 #include <numeric>
 #include <stb_image.h>
 #include "compilation.h"
 #include "declarations/constants.h"
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "nfd_glfw3.h"
 #include "renderer/render.h"
 
 // A simple function to send the image data to the gpu and return the pointer.

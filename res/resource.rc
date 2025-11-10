@@ -1,29 +1,51 @@
-#include <Windows.h>
+#include <winres.h>
 
-// Must be named GLFW_ICON to be seen by GLFW.
-GLFW_ICON ICON "icon.ico"
+#define APP_NAME "Lithogen"
+#define APP_VER_MAJOR 1
+#define APP_VER_MINOR 0
+#define APP_VER_PATCH 1
+
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+#define FMTVER(x,y,z,w) QUOTE(x.y.z.w)
+
+#define APP_VER_STR FMTVER(APP_VER_MAJOR,APP_VER_MINOR,APP_VER_PATCH,0)
+
+#define IDI_ICON1 101
+IDI_ICON1 ICON "icon.ico"
 
 VS_VERSION_INFO	VERSIONINFO
-FILEVERSION		1,0,1,0
-PRODUCTVERSION	1,0,1,0
-FILEOS			VOS_NT_WINDOWS32
-FILETYPE		VFT_APP
-BEGIN
+FILEVERSION     APP_VER_MAJOR,APP_VER_MINOR,APP_VER_PATCH,0
+PRODUCTVERSION  APP_VER_MAJOR,APP_VER_MINOR,APP_VER_PATCH,0
+FILEFLAGSMASK   0x3fL
+#ifdef _DEBUG
+FILEFLAGS       0x1L
+#else
+FILEFLAGS       0x0L
+#endif
+FILEOS          0x40004L
+FILETYPE        0x1L
+FILESUBTYPE     0x0L
+{
 	BLOCK "StringFileInfo"
-	BEGIN
+	{
 		BLOCK "040904E4"
-		BEGIN
-			VALUE "FileDescription",	"LithoGen"
-			VALUE "FileVersion",		"1.0.1"
-			VALUE "ProductName",		"LithoGen"
-			VALUE "ProductVersion",		"1.0.1"
-			VALUE "OriginalFilename",	"lithogen.exe"
-			VALUE "InternalName",		"lithogen"
-        END
-	END
+		{
+			VALUE "FileDescription",    APP_NAME
+			VALUE "FileVersion",        APP_VER_STR
+			VALUE "ProductName",        APP_NAME
+			VALUE "ProductVersion",     APP_VER_STR
+//			VALUE "LegalCopyright",     ""
+//			VALUE "LegalTrademarks1",   ""
+//			VALUE "LegalTrademarks2",   ""
+			VALUE "OriginalFilename",   "handmade.exe"
+			VALUE "CompanyName",        "https://yellowatom.net"
+			VALUE "InternalName",       "handmade"
+		}
+	}
 
 	BLOCK "VarFileInfo"
-	BEGIN
-		VALUE "Translation", 0x409, 1252 // "U.S. English", "Windows ANSI codepage"
-	END
-END
+	{
+		VALUE "Translation", 0x809, 0xFDE9 // "U.K. English", 0xFDE9=65001=CP_UTF8
+	}
+}
